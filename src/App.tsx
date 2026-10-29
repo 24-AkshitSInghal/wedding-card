@@ -106,10 +106,14 @@ export default function App() {
           if (time >= s.model.start) latest = i
         })
         if (latest !== shown) {
+          // Scrolling forward into a scene greets it with a shower of its flowers.
+          const arriving = shown >= 0 && latest > shown
           shown = current = latest
           // Hold back later scenes until the gateway itself has arrived.
           if (loaded) preloader.around(current)
-          particles.current?.setColors(scenes[current].preset.palette.petals)
+          const { air, shower } = scenes[current].preset
+          particles.current?.setMood(air)
+          if (arriving && shower) particles.current?.burst(shower)
         }
       }
       tl.eventCallback('onUpdate', sync)

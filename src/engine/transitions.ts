@@ -60,7 +60,7 @@ const gate: TransitionFn = (ctx, from, to, t, dur) => {
   const el = from.el
   const gateEl = el.querySelector<HTMLElement>('.gate')!
   const doors = qa(el, '.door')
-  const ui = qa(el, '.plaque, .scroll-hint, .doves')
+  const ui = qa(el, '.plaque, .scroll-hint, .doves, .gate-seam')
 
   ft(ctx, ui, { opacity: 1 }, { opacity: 0 }, T(0), dur * 0.1, 'power1.out')
   ft(ctx, el.querySelector('.gate-inside'), { opacity: 0 }, { opacity: 1 }, T(0.04), dur * 0.4, 'power1.out')

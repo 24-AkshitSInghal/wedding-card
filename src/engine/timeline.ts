@@ -97,6 +97,23 @@ export function buildTimeline({ root, scenes, m, bloom }: Options): Engine {
       tl.fromTo(bulbs, { opacity: 0 }, { opacity: 1, duration: 0.12, stagger: { each: 0.025, from: 'random' }, immediateRender: false }, model.restAt - 0.4)
     }
 
+    /* Closing card: the gilt border draws itself in from the corners. */
+    const border = s.el.querySelector<HTMLElement>('.frame-border')
+    if (border) {
+      const across = qa(border, '.fb-top, .fb-bottom')
+      const down = qa(border, '.fb-left, .fb-right')
+      const flourish = qa(border, 'path[pathLength]')
+      const dots = qa(border, '.dot')
+      tl.set(across, { scaleX: 0 }, model.start)
+      tl.set(down, { scaleY: 0 }, model.start)
+      tl.set(flourish, { strokeDasharray: 1, strokeDashoffset: 1 }, model.start)
+      tl.set(dots, { opacity: 0 }, model.start)
+      tl.fromTo(flourish, { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.7, stagger: 0.015, ease: 'power1.inOut', immediateRender: false }, model.restAt - 0.55)
+      tl.fromTo(across, { scaleX: 0 }, { scaleX: 1, duration: 0.85, ease: 'power2.inOut', immediateRender: false }, model.restAt - 0.25)
+      tl.fromTo(down, { scaleY: 0 }, { scaleY: 1, duration: 0.85, ease: 'power2.inOut', immediateRender: false }, model.restAt - 0.25)
+      tl.fromTo(dots, { opacity: 0 }, { opacity: 1, duration: 0.2, stagger: 0.03, immediateRender: false }, model.restAt + 0.4)
+    }
+
     /* Closing medallion: the frame is drawn, the emblem and a final glow appear. */
     const med = s.el.querySelector<HTMLElement>('.medallion')
     if (med) {

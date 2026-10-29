@@ -5,7 +5,7 @@ import { eventUid, initials } from '../lib/format'
 import { Gateway } from './Gateway'
 import { artUrl } from '../lib/art'
 import { Layer } from './Layer'
-import { Doves, FairyLights, Fans, Medallion } from './Ornaments'
+import { Doves, FairyLights, Fans, FrameBorder, Medallion } from './Ornaments'
 import { BlessingText, ClosingText, CoupleText, EventText } from './SceneTexts'
 
 interface Props {
@@ -38,7 +38,6 @@ export function Scene({ scene, index, cfg, eager }: Props) {
       style={style}
     >
       <div className="scene-bg" data-role="bg" />
-      {extras.has('night-top') && <div className="night-top" />}
       {extras.has('rays') && <div className="rays" />}
 
       <div className="frame">
@@ -57,6 +56,7 @@ export function Scene({ scene, index, cfg, eager }: Props) {
           </>
         )}
 
+        {extras.has('border') && <FrameBorder />}
         {extras.has('fan') && <Fans />}
         {extras.has('fairy-lights') && <FairyLights />}
         {extras.has('medallion') && <div className="final-glow" />}

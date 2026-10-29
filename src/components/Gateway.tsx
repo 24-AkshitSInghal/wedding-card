@@ -32,6 +32,8 @@ export function Gateway({ initials }: Props) {
     <div className="layer bottom gate" data-d="0" data-role="gate" style={style}>
       <div className="gate-doorway">
         <div className="gate-inside" />
+        {/* Warm light from the palace leaking through the seam of the closed doors. */}
+        <span className="gate-seam" />
         <div className="gate-doors">
           <div className="door door--l">
             <img src={artUrl('door_left')} alt="" draggable={false} />
@@ -66,6 +68,8 @@ export function Gateway({ initials }: Props) {
         </div>
       </div>
       <img className="gate-img" src={artUrl('gate_frame')} alt="" draggable={false} />
+      {/* A marigold toran hung across the entrance, as for every wedding doorway. */}
+      <img className="gate-toran" src={artUrl('marigold_toran')} alt="" draggable={false} />
     </div>
   )
 }

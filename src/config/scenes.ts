@@ -3,7 +3,7 @@
  * scene enters. Wedding *content* lives in wedding.ts; this file is the stage.
  *
  * Layer geometry is expressed in frame units: the portrait frame is 100 units
- * wide (on phones that is the screen width; on desktop a centred 9:14 window).
+ * wide (on phones that is the screen width; elsewhere a centred 9:16 window).
  *   w      width in units (wh: minimum width as a fraction of frame height)
  *   x      horizontal offset of the layer's centre from the frame centre
  *   y      offset from the anchor edge (bottom/top) in units
@@ -21,7 +21,8 @@ export type TransitionType =
   | 'bloom' // a wash of soft golden light dissolves into the sacred scene
   | 'lift' // the last scene lifts away like a page, revealing the closing
 
-export type Ambient = 'sway' | 'sway-slow' | 'breathe' | 'walk' | 'swing' | 'flicker' | 'drift'
+/** Idle motion: sway/swing hang from the top; breeze bends foliage from its base. */
+export type Ambient = 'sway' | 'sway-slow' | 'breathe' | 'breeze' | 'swing' | 'flicker' | 'drift'
 
 export type LayerRole = 'arch' | 'walker' | 'garland' | 'mandap' | 'emblem' | 'peacock'
 
@@ -51,16 +52,27 @@ export interface Palette {
   edge: string
   /** Text colour on this background. */
   ink: string
-  /** Particle colours (petals). */
-  petals: string[]
   /** Strength of the shade behind the text (raise it for light grounds). Default 0.16. */
   scrim?: number
 }
 
-export type Extra = 'henna' | 'rays' | 'fairy-lights' | 'fan' | 'medallion' | 'night-top'
+/** What drifts through the air of a scene (drawn by components/Particles.tsx). */
+export type Flora = 'petal' | 'blossom' | 'marigold' | 'leaf'
+export interface ParticleMood {
+  flora: { kind: Flora; colors: string[]; weight: number }[]
+  /** Fireflies drifting and glowing. */
+  motes: boolean
+  /** 1 = normal drift; lower settles the air. */
+  speed: number
+}
+
+export type Extra = 'henna' | 'rays' | 'fairy-lights' | 'fan' | 'medallion' | 'border'
 
 export interface ScenePreset {
   palette: Palette
+  air: ParticleMood
+  /** Petals showered from above as the scene arrives (0 for none). */
+  shower?: number
   enter: TransitionType
   enterDur: number
   layers: LayerDef[]
@@ -69,23 +81,29 @@ export interface ScenePreset {
   textTop: number
 }
 
-const ARCH: LayerDef = { src: 'arch_event', w: 100, wh: 0.5, anchor: 'top', y: 0, d: 0, role: 'arch' }
+const ARCH: LayerDef = { src: 'arch_event', w: 100, wh: 0.5, anchor: 'top', y: 0, d: 0, role: 'arch', glint: true }
 const BALUSTRADE: LayerDef = { src: 'balustrade', w: 128, anchor: 'bottom', y: -2, d: 0.35 }
 /** Neighbouring arches of the colonnade, seen on wide screens only. */
 const COLONNADE: LayerDef[] = [
-  { ...ARCH, x: -100, wing: true, role: undefined },
-  { ...ARCH, x: 100, wing: true, role: undefined },
+  { ...ARCH, x: -100, wing: true, role: undefined, glint: false },
+  { ...ARCH, x: 100, wing: true, role: undefined, glint: false },
   { ...BALUSTRADE, x: -126, wing: true },
   { ...BALUSTRADE, x: 126, wing: true },
 ]
 
-const PETALS_RED = ['#b3202a', '#d2414a', '#8e1622', '#e7a1a6']
-const PETALS_PINK = ['#e48aa6', '#f3c1cf', '#c2416b', '#fff1e6']
-const PETALS_MARIGOLD = ['#f2a516', '#e8800e', '#ffd25a', '#c9590a']
-const PETALS_JASMINE = ['#fff6e6', '#f6e7cf', '#e9b7b7', '#c43a3a']
+const ROSE = ['#b3202a', '#d2414a', '#8e1622', '#e7a1a6']
+const PINK = ['#e48aa6', '#f3c1cf', '#c2416b']
+const BLOSSOM = ['#fff6ee', '#f8d3dc', '#f1a9bd']
+const JASMINE = ['#fffaf0', '#f6ecd8']
+const MARIGOLD = ['#f2a516', '#e8800e', '#ffcf4a', '#d9650c']
+const LEAF = ['#7f9a4a', '#5e7f3a', '#a3b86a']
+
+const air = (flora: ParticleMood['flora'], motes = false, speed = 1): ParticleMood => ({ flora, motes, speed })
 
 export const OPENING: ScenePreset = {
-  palette: { center: '#5a564a', mid: '#3f3d35', edge: '#1d1c18', ink: '#f3e4c3', petals: PETALS_PINK },
+  // A wine-red palace night.
+  palette: { center: '#8a2830', mid: '#55141a', edge: '#1f0608', ink: '#f3e4c3' },
+  air: air([{ kind: 'blossom', colors: BLOSSOM, weight: 3 }, { kind: 'petal', colors: PINK, weight: 2 }], true),
   enter: 'gate',
   enterDur: 0,
   textTop: 0.62,
@@ -94,16 +112,18 @@ export const OPENING: ScenePreset = {
     { src: 'garden_side', w: 84, x: 142, anchor: 'bottom', y: 0, d: 0.1, flip: true, wing: true },
     { src: 'garden_side', w: 76, x: -72, anchor: 'bottom', y: 0, d: 0.25, wing: true },
     { src: 'garden_side', w: 76, x: 72, anchor: 'bottom', y: 0, d: 0.25, flip: true, wing: true },
-    { src: 'garden_side', w: 50, x: -40, anchor: 'bottom', y: 0, d: 0.55 },
-    { src: 'garden_side', w: 50, x: 40, anchor: 'bottom', y: 0, d: 0.55, flip: true },
-    { src: 'blossom_branch', w: 70, x: -30, anchor: 'top', y: -4, d: 0.75, ambient: 'sway-slow' },
-    { src: 'blossom_branch', w: 62, x: 34, anchor: 'top', y: -2, d: 0.8, flip: true, ambient: 'sway-slow', delay: -3 },
-    { src: 'red_flower_bush', w: 128, anchor: 'bottom', y: -13, d: 0.9 },
+    { src: 'garden_side', w: 50, x: -40, anchor: 'bottom', y: 0, d: 0.55, ambient: 'breeze' },
+    { src: 'garden_side', w: 50, x: 40, anchor: 'bottom', y: 0, d: 0.55, flip: true, ambient: 'breeze', delay: -4 },
+    { src: 'blossom_branch', w: 70, x: -30, anchor: 'top', y: -4, d: 0.75, ambient: 'sway' },
+    { src: 'blossom_branch', w: 62, x: 34, anchor: 'top', y: -2, d: 0.8, flip: true, ambient: 'sway', delay: -3 },
+    { src: 'red_flower_bush', w: 128, anchor: 'bottom', y: -13, d: 0.9, ambient: 'breeze', delay: -2 },
   ],
 }
 
 export const COUPLE: ScenePreset = {
-  palette: { center: '#ad433b', mid: '#93302b', edge: '#561414', ink: '#f6e6c4', petals: PETALS_RED },
+  palette: { center: '#ad433b', mid: '#93302b', edge: '#561414', ink: '#f6e6c4' },
+  air: air([{ kind: 'petal', colors: ROSE, weight: 3 }, { kind: 'blossom', colors: JASMINE, weight: 1 }]),
+  shower: 26,
   enter: 'gate',
   enterDur: 2.0,
   textTop: 0.225,
@@ -114,20 +134,21 @@ export const COUPLE: ScenePreset = {
     { src: 'palace_terrace', w: 120, x: 95, anchor: 'bottom', y: 4, d: -0.3, wing: true, flip: true },
     ...COLONNADE.slice(0, 2),
     ARCH,
-    { src: 'cypress_pair', w: 22, x: -41, anchor: 'bottom', y: 24, d: -0.15 },
-    { src: 'flowering_tree', w: 30, x: 40, anchor: 'bottom', y: 14, d: 0.05 },
+    { src: 'cypress_pair', w: 22, x: -41, anchor: 'bottom', y: 24, d: -0.15, ambient: 'breeze' },
+    { src: 'flowering_tree', w: 30, x: 40, anchor: 'bottom', y: 14, d: 0.05, ambient: 'breeze', delay: -3 },
     { src: 'chhatri_large', w: 44, x: -31, anchor: 'bottom', y: 10, d: 0.05 },
     { src: 'peacock_standing', w: 27, x: -37, anchor: 'bottom', y: 8, d: 0.3, ambient: 'breathe', role: 'peacock', glint: true },
     { src: 'wisteria_hanging', w: 42, x: -34, anchor: 'top', y: -3, d: 0.45, ambient: 'sway' },
     { src: 'vine_hanging', w: 26, x: 40, anchor: 'top', y: -2, d: 0.4, ambient: 'sway', delay: -2 },
     { src: 'banana_leaves', w: 52, x: 32, anchor: 'bottom', y: 2, d: 0.6, ambient: 'sway-slow' },
-    { src: 'red_flower_bush', w: 124, anchor: 'bottom', y: -11, d: 0.85 },
+    { src: 'red_flower_bush', w: 124, anchor: 'bottom', y: -11, d: 0.85, ambient: 'breeze' },
     { src: 'emblem_buta', w: 19, anchor: 'top', y: 0, yh: 0.045, d: 0, role: 'emblem', glint: true },
   ],
 }
 
 export const BLESSING: ScenePreset = {
-  palette: { center: '#a83c36', mid: '#8c2b28', edge: '#4f1212', ink: '#f6e6c4', petals: PETALS_RED },
+  palette: { center: '#a83c36', mid: '#8c2b28', edge: '#4f1212', ink: '#f6e6c4' },
+  air: air([{ kind: 'petal', colors: ROSE, weight: 3 }, { kind: 'leaf', colors: LEAF, weight: 1 }]),
   enter: 'crane',
   enterDur: 1.0,
   textTop: 0.075,
@@ -139,14 +160,16 @@ export const BLESSING: ScenePreset = {
     { src: 'peacock_lookback', w: 28, x: 10, anchor: 'bottom', y: 40, d: 0.15, ambient: 'breathe', role: 'peacock', glint: true },
     { src: 'peacock_standing', w: 34, x: 30, anchor: 'bottom', y: 8, d: 0.35, flip: true, ambient: 'breathe', delay: -2.5, role: 'peacock', glint: true },
     { src: 'banana_leaves', w: 50, x: -34, anchor: 'bottom', y: 0, d: 0.65, ambient: 'sway-slow' },
-    { src: 'red_flower_bush', w: 140, anchor: 'bottom', y: -6, d: 0.9 },
+    { src: 'red_flower_bush', w: 140, anchor: 'bottom', y: -6, d: 0.9, ambient: 'breeze' },
   ],
 }
 
 /** Event scenes. Any event can use any of these via `scene` in wedding.ts. */
 export const EVENT_SCENES: Record<string, ScenePreset> = {
   mehendi: {
-    palette: { center: '#7d6d1d', mid: '#64520f', edge: '#2f2604', ink: '#f6e8c0', petals: PETALS_PINK },
+    palette: { center: '#7d6d1d', mid: '#64520f', edge: '#2f2604', ink: '#f6e8c0' },
+    air: air([{ kind: 'blossom', colors: PINK, weight: 2 }, { kind: 'leaf', colors: LEAF, weight: 2 }]),
+    shower: 12,
     enter: 'truck',
     enterDur: 1.0,
     textTop: 0.27,
@@ -156,7 +179,7 @@ export const EVENT_SCENES: Record<string, ScenePreset> = {
       ARCH,
       { src: 'vine_hanging', w: 24, x: -33, anchor: 'top', y: 9, d: 0.2, ambient: 'sway' },
       { src: 'vine_hanging', w: 22, x: 34, anchor: 'top', y: 10, d: 0.2, flip: true, ambient: 'sway', delay: -2.2 },
-      { src: 'cypress_pair', w: 22, x: -40, anchor: 'bottom', y: 20, d: -0.1 },
+      { src: 'cypress_pair', w: 22, x: -40, anchor: 'bottom', y: 20, d: -0.1, ambient: 'breeze' },
       { src: 'chhatri_large', w: 44, x: 31, anchor: 'bottom', y: 14, d: 0.05 },
       { src: 'peacock_standing', w: 28, x: 23, anchor: 'bottom', y: 9, d: 0.3, flip: true, ambient: 'breathe', role: 'peacock', glint: true },
       BALUSTRADE,
@@ -164,7 +187,9 @@ export const EVENT_SCENES: Record<string, ScenePreset> = {
     ],
   },
   haldi: {
-    palette: { center: '#b8771c', mid: '#a06210', edge: '#5e3404', ink: '#fff3d6', petals: PETALS_MARIGOLD, scrim: 0.34 },
+    palette: { center: '#b8771c', mid: '#a06210', edge: '#5e3404', ink: '#fff3d6', scrim: 0.34 },
+    air: air([{ kind: 'marigold', colors: MARIGOLD, weight: 4 }, { kind: 'leaf', colors: LEAF, weight: 1 }]),
+    shower: 20,
     enter: 'truck',
     enterDur: 1.0,
     textTop: 0.27,
@@ -173,14 +198,16 @@ export const EVENT_SCENES: Record<string, ScenePreset> = {
       ...COLONNADE,
       ARCH,
       { src: 'marigold_toran', w: 86, anchor: 'top', y: 12, d: 0.25, ambient: 'sway-slow', role: 'garland' },
-      { src: 'cypress_pair', w: 22, x: 41, anchor: 'bottom', y: 20, d: -0.1 },
+      { src: 'cypress_pair', w: 22, x: 41, anchor: 'bottom', y: 20, d: -0.1, ambient: 'breeze' },
       { src: 'haldi_pavilion', w: 58, x: -21, anchor: 'bottom', y: 10, d: 0.1 },
       BALUSTRADE,
       { src: 'banana_leaves', w: 48, x: 32, anchor: 'bottom', y: -2, d: 0.6, flip: true, ambient: 'sway-slow' },
     ],
   },
   garba: {
-    palette: { center: '#c2561e', mid: '#a84214', edge: '#5c1f05', ink: '#fff3dc', petals: PETALS_MARIGOLD, scrim: 0.28 },
+    palette: { center: '#c2561e', mid: '#a84214', edge: '#5c1f05', ink: '#fff3dc', scrim: 0.28 },
+    air: air([{ kind: 'marigold', colors: MARIGOLD, weight: 2 }, { kind: 'petal', colors: ROSE, weight: 1 }], true),
+    shower: 12,
     enter: 'iris',
     enterDur: 1.0,
     textTop: 0.28,
@@ -201,7 +228,9 @@ export const EVENT_SCENES: Record<string, ScenePreset> = {
     ],
   },
   baraat: {
-    palette: { center: '#b43a66', mid: '#992650', edge: '#4f0b27', ink: '#fbe7d4', petals: PETALS_PINK },
+    palette: { center: '#b43a66', mid: '#992650', edge: '#4f0b27', ink: '#fbe7d4' },
+    air: air([{ kind: 'petal', colors: PINK, weight: 3 }, { kind: 'marigold', colors: MARIGOLD, weight: 1 }]),
+    shower: 18,
     enter: 'procession',
     enterDur: 1.15,
     textTop: 0.29,
@@ -219,25 +248,29 @@ export const EVENT_SCENES: Record<string, ScenePreset> = {
     ],
   },
   varmala: {
-    palette: { center: '#ab3a40', mid: '#8d272d', edge: '#4a0f13', ink: '#f8e7c8', petals: PETALS_RED },
+    palette: { center: '#ab3a40', mid: '#8d272d', edge: '#4a0f13', ink: '#f8e7c8' },
+    air: air([{ kind: 'petal', colors: ROSE, weight: 4 }, { kind: 'blossom', colors: JASMINE, weight: 2 }]),
+    shower: 30,
     enter: 'curtain',
     enterDur: 1.1,
     textTop: 0.255,
     layers: [
       ...COLONNADE,
       ARCH,
-      { src: 'cypress_pair', w: 22, x: -40, anchor: 'bottom', y: 22, d: -0.1 },
-      { src: 'cypress_pair', w: 22, x: 40, anchor: 'bottom', y: 22, d: -0.1, flip: true },
+      { src: 'cypress_pair', w: 22, x: -40, anchor: 'bottom', y: 22, d: -0.1, ambient: 'breeze' },
+      { src: 'cypress_pair', w: 22, x: 40, anchor: 'bottom', y: 22, d: -0.1, flip: true, ambient: 'breeze', delay: -3 },
       { src: 'mandap_floral', w: 62, anchor: 'bottom', y: 10, d: 0.1, role: 'mandap' },
       { src: 'jasmine_strings', w: 62, anchor: 'top', y: -26, d: 0.3, ambient: 'sway-slow', role: 'garland' },
       { src: 'brass_urn', w: 20, x: -36, anchor: 'bottom', y: 6, d: 0.55 },
       { src: 'brass_urn', w: 20, x: 36, anchor: 'bottom', y: 6, d: 0.55, flip: true },
       { src: 'banana_leaves', w: 40, x: -40, anchor: 'bottom', y: -6, d: 0.8, ambient: 'sway-slow' },
-      { src: 'red_flower_bush', w: 130, anchor: 'bottom', y: -10, d: 0.92 },
+      { src: 'red_flower_bush', w: 130, anchor: 'bottom', y: -10, d: 0.92, ambient: 'breeze' },
     ],
   },
   'hasta-melap': {
-    palette: { center: '#3c7a2a', mid: '#2a5a1b', edge: '#0f2a0a', ink: '#f6ead0', petals: PETALS_JASMINE },
+    palette: { center: '#3c7a2a', mid: '#2a5a1b', edge: '#0f2a0a', ink: '#f6ead0' },
+    air: air([{ kind: 'blossom', colors: JASMINE, weight: 3 }, { kind: 'petal', colors: ROSE, weight: 2 }], true, 0.8),
+    shower: 18,
     enter: 'bloom',
     enterDur: 1.0,
     textTop: 0.225,
@@ -257,20 +290,29 @@ export const EVENT_SCENES: Record<string, ScenePreset> = {
 }
 EVENT_SCENES.sangeet = EVENT_SCENES.garba
 
+/**
+ * The closing: a framed final card. A rose garland and vines at the top, the medallion,
+ * the families' blessing in clear space, and a flowering border with two peacocks below.
+ */
 export const CLOSING: ScenePreset = {
-  palette: { center: '#9c3433', mid: '#7c2223', edge: '#3d0c0e', ink: '#f6e6c4', petals: PETALS_RED },
+  palette: { center: '#9c3433', mid: '#7c2223', edge: '#3d0c0e', ink: '#f6e6c4' },
+  air: air([{ kind: 'petal', colors: ROSE, weight: 3 }, { kind: 'blossom', colors: JASMINE, weight: 1 }], true, 0.6),
+  shower: 30,
   enter: 'lift',
   enterDur: 1.1,
-  textTop: 0.6,
-  extras: ['night-top', 'medallion'],
+  textTop: 0.485,
+  extras: ['border', 'medallion'],
   layers: [
-    { src: 'garden_side', w: 56, x: -36, anchor: 'bottom-at', yh: 0.44, d: -0.2 },
-    { src: 'garden_side', w: 56, x: 36, anchor: 'bottom-at', yh: 0.44, d: -0.2, flip: true },
-    { src: 'garden_side', w: 70, x: -100, anchor: 'bottom-at', yh: 0.44, d: -0.3, wing: true },
-    { src: 'garden_side', w: 70, x: 100, anchor: 'bottom-at', yh: 0.44, d: -0.3, wing: true, flip: true },
-    { src: 'banana_leaves', w: 44, x: -30, anchor: 'bottom-at', yh: 0.46, d: 0.1, ambient: 'sway-slow' },
-    { src: 'banana_leaves', w: 44, x: 30, anchor: 'bottom-at', yh: 0.46, d: 0.1, flip: true, ambient: 'sway-slow', delay: -2 },
-    { src: 'red_flower_bush', w: 150, anchor: 'bottom-at', yh: 0.5, d: 0.3 },
+    { src: 'palace_terrace', w: 125, x: -108, anchor: 'bottom', y: 2, d: -0.3, wing: true },
+    { src: 'palace_terrace', w: 125, x: 108, anchor: 'bottom', y: 2, d: -0.3, wing: true, flip: true },
+    { src: 'rose_garland', w: 92, anchor: 'top', y: 1.5, d: 0.2, ambient: 'sway-slow', role: 'garland' },
+    { src: 'vine_hanging', w: 17, x: -40, anchor: 'top', y: 0, d: 0.3, ambient: 'sway', delay: -1.5 },
+    { src: 'vine_hanging', w: 17, x: 40, anchor: 'top', y: 0, d: 0.3, flip: true, ambient: 'sway', delay: -3.5 },
+    { src: 'banana_leaves', w: 34, x: -40, anchor: 'bottom', y: -8, d: 0.2, ambient: 'sway-slow' },
+    { src: 'banana_leaves', w: 34, x: 40, anchor: 'bottom', y: -8, d: 0.2, flip: true, ambient: 'sway-slow', delay: -2 },
+    { src: 'peacock_standing', w: 21, x: -34, anchor: 'bottom', y: -10, d: 0.35, ambient: 'breathe', role: 'peacock', glint: true },
+    { src: 'peacock_standing', w: 21, x: 34, anchor: 'bottom', y: -10, d: 0.35, flip: true, ambient: 'breathe', delay: -2.6, role: 'peacock', glint: true },
+    { src: 'red_flower_bush', w: 118, anchor: 'bottom', y: -18, d: 0.6, ambient: 'breeze' },
   ],
 }
 

@@ -237,3 +237,32 @@ export function CalendarIcon() {
     </svg>
   )
 }
+
+/** Gilt double border with flourished corners that draws itself around the closing card. */
+export function FrameBorder() {
+  const corner = (pos: string) => (
+    <svg key={pos} className={`fb-corner fb-${pos}`} viewBox="0 0 60 60" aria-hidden="true">
+      <g fill="none" stroke="currentColor" strokeLinecap="round">
+        <path pathLength={1} strokeWidth="1.6" d="M4 60 V 24 C 4 13, 13 4, 24 4 H 60" />
+        <path pathLength={1} strokeWidth="0.8" d="M10 60 V 27 C 10 17.5, 17.5 10, 27 10 H 60" />
+        <path pathLength={1} strokeWidth="1" d="M23 23 C 17 23, 15 17, 19 14 C 23 11, 28 15, 25 19" />
+        <path pathLength={1} strokeWidth="1" d="M31 19 C 37 13, 45 15, 47 19 C 41 21, 35 21, 31 19 Z" />
+        <path pathLength={1} strokeWidth="1" d="M19 31 C 13 37, 15 45, 19 47 C 21 41, 21 35, 19 31 Z" />
+      </g>
+      <g fill="currentColor">
+        <circle className="dot" cx="27" cy="27" r="1.6" />
+        <circle className="dot" cx="52" cy="19" r="1.1" />
+        <circle className="dot" cx="19" cy="52" r="1.1" />
+      </g>
+    </svg>
+  )
+  return (
+    <div className="frame-border" data-d="0" aria-hidden="true">
+      <i className="fb-line fb-top" />
+      <i className="fb-line fb-bottom" />
+      <i className="fb-line fb-left" />
+      <i className="fb-line fb-right" />
+      {['tl', 'tr', 'bl', 'br'].map(corner)}
+    </div>
+  )
+}

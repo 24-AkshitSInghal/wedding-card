@@ -12,7 +12,7 @@
   --gold: #e7c27c;
   --gold-deep: #b88a43;
   --ivory: #f6e6c4;
-  --night: #1d1c18;
+  --night: #1c0609;
 
   /* Stage = viewport. The portrait frame is the 9:16 window all art is laid out in —
      the reference's own format. Wider screens see the palace continue beyond it. */
@@ -274,8 +274,9 @@ img {
   animation: breathe 5.2s ease-in-out infinite alternate;
   animation-delay: var(--delay);
 }
-.amb-walk .art {
-  animation: walk 1.9s ease-in-out infinite;
+.amb-breeze .art {
+  transform-origin: 50% 100%;
+  animation: breeze 7s ease-in-out infinite;
   animation-delay: var(--delay);
 }
 .amb-drift .art {
@@ -303,11 +304,12 @@ img {
   0% { rotate: -0.5deg; translate: 0 0; }
   100% { rotate: 0.6deg; translate: 0 -0.5%; }
 }
-@keyframes walk {
-  0%, 100% { translate: 0 0; rotate: 0deg; }
-  25% { translate: 0 -0.8%; rotate: -0.35deg; }
-  50% { translate: 0 0; rotate: 0deg; }
-  75% { translate: 0 -0.6%; rotate: 0.3deg; }
+/* Foliage bending in a soft breeze from its rooted base. */
+@keyframes breeze {
+  0%, 100% { transform: skewX(0deg); }
+  30% { transform: skewX(-1.6deg); }
+  55% { transform: skewX(0.5deg); }
+  75% { transform: skewX(-0.8deg); }
 }
 @keyframes drift {
   from { translate: -1% 0; }
@@ -349,17 +351,6 @@ img {
   to { rotate: 360deg; }
 }
 
-.night-top {
-  position: absolute;
-  inset: 0 0 auto 0;
-  height: calc(var(--fh) * 0.5);
-  z-index: calc(var(--zs) + 1);
-  background:
-    radial-gradient(ellipse 60% 70% at 50% 100%, rgb(70 66 54 / 0.9), transparent 70%),
-    linear-gradient(180deg, #1c1b17 0%, #34322b 70%, #403d33 100%);
-  -webkit-mask: linear-gradient(180deg, #000 80%, transparent);
-  mask: linear-gradient(180deg, #000 80%, transparent);
-}
 
 .grain {
   position: fixed;
