@@ -1,0 +1,401 @@
+@import '@fontsource/cinzel/400.css';
+@import '@fontsource/cinzel/500.css';
+@import '@fontsource/cinzel/600.css';
+@import '@fontsource/cormorant-garamond/400.css';
+@import '@fontsource/cormorant-garamond/500.css';
+@import '@fontsource/cormorant-garamond/400-italic.css';
+@import '@fontsource/cormorant-garamond/500-italic.css';
+@import '@fontsource/pinyon-script/400.css';
+
+:root {
+  --gold-hi: #fff2cf;
+  --gold: #e7c27c;
+  --gold-deep: #b88a43;
+  --ivory: #f6e6c4;
+  --night: #1d1c18;
+
+  /* Stage = viewport. The portrait frame is the 9:16 window all art is laid out in —
+     the reference's own format. Wider screens see the palace continue beyond it. */
+  --fh: 100vh;
+  --fw: min(100vw, calc(var(--fh) * 0.5625));
+  --u: calc(var(--fw) / 100);
+
+  --serif: 'Cormorant Garamond', 'Cormorant', Georgia, serif;
+  --caps: 'Cinzel', 'Trajan Pro', Georgia, serif;
+  --script: 'Pinyon Script', 'Cormorant Garamond', cursive;
+
+  color-scheme: dark;
+}
+
+@supports (height: 100lvh) {
+  :root {
+    --fh: 100lvh;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--night);
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  /* The painting is the page: hide the desktop scrollbar (wheel, touch and keys still scroll). */
+  scrollbar-width: none;
+}
+html::-webkit-scrollbar {
+  display: none;
+}
+
+body {
+  margin: 0;
+  background: var(--night);
+  color: var(--ivory);
+  font-family: var(--serif);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+img {
+  display: block;
+  max-width: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ── Scroll spacer & fixed stage ─────────────────────────────────────────── */
+
+.scroll-track {
+  position: relative;
+  width: 100%;
+}
+
+.stage {
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: var(--fh);
+  overflow: hidden;
+  isolation: isolate;
+  contain: strict;
+  background: var(--night);
+}
+
+.scene {
+  position: absolute;
+  inset: 0;
+  --zs: 100;
+}
+.scene.is-off {
+  visibility: hidden;
+}
+.scene:not(.is-active) * {
+  animation-play-state: paused !important;
+}
+.scene--opening {
+  --zs: 200;
+}
+.scene--closing {
+  --zs: 0;
+}
+
+.scene-bg {
+  position: absolute;
+  inset: -2px;
+  z-index: calc(var(--zs) + 0);
+  background:
+    radial-gradient(ellipse 62% 48% at 50% 40%, var(--c-center) 0%, var(--c-mid) 58%, var(--c-edge) 115%);
+}
+.scene:not(.is-off) > .scene-bg {
+  will-change: opacity, transform;
+}
+/* Velvet: soft mottling like the painted grounds in the reference */
+.scene-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 40% 30% at 30% 25%, rgb(255 230 190 / 0.07), transparent 70%),
+    radial-gradient(ellipse 35% 28% at 72% 62%, rgb(0 0 0 / 0.12), transparent 70%),
+    radial-gradient(ellipse 50% 40% at 50% 100%, rgb(0 0 0 / 0.3), transparent 70%);
+}
+
+.frame {
+  position: absolute;
+  top: 0;
+  height: var(--fh);
+  width: var(--fw);
+  left: calc(50% - var(--fw) / 2);
+}
+
+/* ── Layers ──────────────────────────────────────────────────────────────── */
+
+.layer {
+  --lw: max(calc(var(--u) * var(--w)), calc(var(--fh) * var(--wh)));
+  position: absolute;
+  width: var(--lw);
+  left: calc(50% + var(--u) * var(--x) - var(--lw) / 2);
+  z-index: calc(var(--zs) + var(--z));
+  pointer-events: none;
+}
+/* Promote layers to the GPU only while their scene is on stage. */
+.scene:not(.is-off) .layer {
+  will-change: transform, opacity;
+}
+.layer.bottom {
+  bottom: calc(var(--u) * var(--y));
+}
+.layer.top {
+  top: calc(var(--u) * var(--y) + var(--fh) * var(--yh));
+}
+.layer.bottom-at {
+  bottom: calc(var(--fh) * (1 - var(--yh)) + var(--u) * var(--y));
+}
+.layer.top .art {
+  transform-origin: 50% 0;
+}
+.layer.bottom .art,
+.layer.bottom-at .art {
+  transform-origin: 50% 100%;
+}
+
+.art {
+  position: relative;
+}
+.art img {
+  width: 100%;
+  height: auto;
+}
+.art.flip {
+  scale: -1 1;
+}
+
+/* Wide screens show the extended palace on both sides of the portrait frame. */
+.wing {
+  display: none;
+}
+@media (min-aspect-ratio: 3/5) {
+  .wing {
+    display: block;
+  }
+  .narrow {
+    display: none;
+  }
+}
+
+.wing-shade {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: calc(50% - var(--fw) / 2 + 2px);
+  z-index: 330;
+  pointer-events: none;
+}
+.wing-shade.left {
+  left: 0;
+  background: linear-gradient(90deg, rgb(10 6 4 / 0.62), rgb(10 6 4 / 0.18) 70%, transparent);
+}
+.wing-shade.right {
+  right: 0;
+  background: linear-gradient(270deg, rgb(10 6 4 / 0.62), rgb(10 6 4 / 0.18) 70%, transparent);
+}
+
+/* Moving highlight masked to the artwork: gold catching the light. */
+.glint {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  -webkit-mask: var(--mask) center / 100% 100% no-repeat;
+  mask: var(--mask) center / 100% 100% no-repeat;
+  mix-blend-mode: overlay;
+}
+.glint::before {
+  content: '';
+  position: absolute;
+  inset: -10% -60%;
+  background: linear-gradient(105deg, transparent 38%, rgb(255 244 214 / 0.95) 50%, transparent 62%);
+  animation: glint 7.5s ease-in-out infinite;
+  translate: -70% 0;
+}
+
+/* Living details: a peacock turning its head, an elephant's ear fanning. */
+.art .part {
+  position: absolute;
+  inset: 0;
+}
+.part--head {
+  animation: head-turn 7.5s ease-in-out infinite;
+  animation-delay: var(--delay);
+}
+.part--ear {
+  animation: ear-fan 3.4s ease-in-out infinite;
+}
+@keyframes head-turn {
+  0%, 12% { rotate: 0deg; }
+  22%, 38% { rotate: -3.5deg; }
+  50% { rotate: 0.5deg; }
+  60%, 76% { rotate: 2.5deg; }
+  88%, 100% { rotate: 0deg; }
+}
+@keyframes ear-fan {
+  0%, 30%, 100% { scale: 1 1; }
+  55% { scale: 1.05 1; }
+  70% { scale: 0.99 1; }
+}
+
+/* ── Ambient life (transform-only, paused when the scene is not active) ──── */
+
+.amb-sway .art {
+  animation: sway 6.5s ease-in-out infinite alternate;
+  animation-delay: var(--delay);
+}
+.amb-sway-slow .art {
+  animation: sway-slow 9s ease-in-out infinite alternate;
+  animation-delay: var(--delay);
+}
+.amb-swing .art {
+  animation: swing 4.6s ease-in-out infinite alternate;
+  animation-delay: var(--delay);
+}
+.amb-breathe .art {
+  animation: breathe 5.2s ease-in-out infinite alternate;
+  animation-delay: var(--delay);
+}
+.amb-walk .art {
+  animation: walk 1.9s ease-in-out infinite;
+  animation-delay: var(--delay);
+}
+.amb-drift .art {
+  animation: drift 12s ease-in-out infinite alternate;
+  animation-delay: var(--delay);
+}
+.amb-flicker .art {
+  animation: flicker 3.2s ease-in-out infinite;
+  animation-delay: var(--delay);
+}
+
+@keyframes sway {
+  from { rotate: -1.6deg; }
+  to { rotate: 1.4deg; }
+}
+@keyframes sway-slow {
+  from { rotate: -0.9deg; translate: -0.15% 0; }
+  to { rotate: 0.8deg; translate: 0.2% 0; }
+}
+@keyframes swing {
+  from { rotate: -3.2deg; }
+  to { rotate: 3deg; }
+}
+@keyframes breathe {
+  0% { rotate: -0.5deg; translate: 0 0; }
+  100% { rotate: 0.6deg; translate: 0 -0.5%; }
+}
+@keyframes walk {
+  0%, 100% { translate: 0 0; rotate: 0deg; }
+  25% { translate: 0 -0.8%; rotate: -0.35deg; }
+  50% { translate: 0 0; rotate: 0deg; }
+  75% { translate: 0 -0.6%; rotate: 0.3deg; }
+}
+@keyframes drift {
+  from { translate: -1% 0; }
+  to { translate: 1% -0.5%; }
+}
+@keyframes flicker {
+  0%, 100% { opacity: 1; }
+  40% { opacity: 0.86; }
+  60% { opacity: 0.95; }
+}
+@keyframes glint {
+  0%, 55% { translate: -70% 0; }
+  85%, 100% { translate: 70% 0; }
+}
+
+/* ── Atmosphere ──────────────────────────────────────────────────────────── */
+
+.rays {
+  position: absolute;
+  left: 50%;
+  top: -40%;
+  width: 220vmax;
+  height: 220vmax;
+  margin-left: -110vmax;
+  z-index: calc(var(--zs) + 2);
+  pointer-events: none;
+  opacity: 0;
+  background: repeating-conic-gradient(
+    from 0deg at 50% 50%,
+    rgb(255 236 186 / 0) 0deg 5deg,
+    rgb(255 236 186 / 0.16) 7deg 9deg,
+    rgb(255 236 186 / 0) 12deg 17deg
+  );
+  -webkit-mask: radial-gradient(circle at 50% 50%, #000 0, rgb(0 0 0 / 0.6) 18%, transparent 42%);
+  mask: radial-gradient(circle at 50% 50%, #000 0, rgb(0 0 0 / 0.6) 18%, transparent 42%);
+  animation: rays 60s linear infinite;
+}
+@keyframes rays {
+  to { rotate: 360deg; }
+}
+
+.night-top {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: calc(var(--fh) * 0.5);
+  z-index: calc(var(--zs) + 1);
+  background:
+    radial-gradient(ellipse 60% 70% at 50% 100%, rgb(70 66 54 / 0.9), transparent 70%),
+    linear-gradient(180deg, #1c1b17 0%, #34322b 70%, #403d33 100%);
+  -webkit-mask: linear-gradient(180deg, #000 80%, transparent);
+  mask: linear-gradient(180deg, #000 80%, transparent);
+}
+
+.grain {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  pointer-events: none;
+  opacity: 0.22;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.5  0 0 0 0 0.45  0 0 0 0 0.38  0 0 0 0.9 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+
+.bloom {
+  position: fixed;
+  inset: 0;
+  z-index: 420;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(ellipse 70% 60% at 50% 42%, #fff6e2 0%, #ffe3ab 45%, rgb(240 190 110 / 0.85) 100%);
+  will-change: opacity;
+}
+
+.particles {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: var(--fh);
+  z-index: 410;
+  pointer-events: none;
+}
+
+/* Reduced motion: no ambient movement; scenes simply cross-fade (see transitions.ts). */
+.is-reduced .scene *,
+.is-reduced .rays,
+.is-reduced .glint::before {
+  animation: none !important;
+}
+.is-reduced .dove {
+  display: none;
+}
