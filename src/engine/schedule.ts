@@ -1,8 +1,8 @@
-import { BLESSING, CLOSING, COUPLE, HOLD, OPENING, presetFor } from '../config/scenes'
+import { BLESSING, CLOSING, COUNTDOWN, COUPLE, FAMILY_WELCOME, HOLD, LITTLE_HEARTS, OPENING, presetFor, STORY_ONE, STORY_TWO } from '../config/scenes'
 import type { ScenePreset, TransitionType } from '../config/scenes'
-import type { WeddingConfig, WeddingEvent } from '../config/wedding'
+import type { StoryChapter, WeddingConfig, WeddingEvent } from '../config/wedding'
 
-export type SceneKind = 'opening' | 'couple' | 'blessing' | 'event' | 'closing'
+export type SceneKind = 'opening' | 'couple' | 'blessing' | 'countdown' | 'story' | 'event' | 'little' | 'welcome' | 'closing'
 
 export interface SceneModel {
   id: string
@@ -10,6 +10,9 @@ export interface SceneModel {
   preset: ScenePreset
   event?: WeddingEvent
   eventIndex?: number
+  /** For story scenes: the chapters shown, and whether the introduction leads. */
+  chapters?: StoryChapter[]
+  intro?: boolean
   /* Timeline positions in scroll units (1 unit = one viewport height of scrolling). */
   start: number // the enter transition begins
   restAt: number // the scene is fully composed
@@ -23,9 +26,26 @@ export interface SceneModel {
 const TAIL = 0.35
 
 export function buildScenes(cfg: WeddingConfig): { scenes: SceneModel[]; total: number } {
-  const raw: { id: string; kind: SceneKind; preset: ScenePreset; hold: number; event?: WeddingEvent; eventIndex?: number }[] = [
+  type Raw = Pick<SceneModel, 'id' | 'kind' | 'preset' | 'event' | 'eventIndex' | 'chapters' | 'intro'> & { hold: number }
+  // Long stories are told across two scenes so every chapter has room to breathe.
+  const { chapters } = cfg.story
+  const split = chapters.length > 2 ? Math.ceil(chapters.length / 2) : chapters.length
+  const story: Raw[] = chapters.length
+    ? [
+        { id: 'story-1', kind: 'story', preset: STORY_ONE, hold: HOLD.story, chapters: chapters.slice(0, split), intro: true },
+        ...(chapters.length > split
+          ? [{ id: 'story-2', kind: 'story' as const, preset: STORY_TWO, hold: HOLD.story, chapters: chapters.slice(split) }]
+          : []),
+      ]
+    : []
+  const little = cfg.littleHearts
+  const { welcome } = cfg
+
+  const raw: Raw[] = [
     { id: 'opening', kind: 'opening', preset: OPENING, hold: HOLD.opening },
     { id: 'couple', kind: 'couple', preset: COUPLE, hold: HOLD.couple },
+    ...(cfg.countdown.show ? [{ id: 'countdown', kind: 'countdown' as const, preset: COUNTDOWN, hold: HOLD.countdown }] : []),
+    ...story,
     { id: 'blessing', kind: 'blessing', preset: BLESSING, hold: HOLD.blessing },
     ...cfg.events.map((event, i) => ({
       id: `event-${i}-${event.id}`,
@@ -35,6 +55,12 @@ export function buildScenes(cfg: WeddingConfig): { scenes: SceneModel[]; total: 
       event,
       eventIndex: i,
     })),
+    ...(little.names.trim() || little.message.length
+      ? [{ id: 'little', kind: 'little' as const, preset: LITTLE_HEARTS, hold: HOLD.welcome }]
+      : []),
+    ...(welcome.hearty.length || welcome.special.length
+      ? [{ id: 'welcome', kind: 'welcome' as const, preset: FAMILY_WELCOME, hold: HOLD.welcome }]
+      : []),
     { id: 'closing', kind: 'closing', preset: CLOSING, hold: HOLD.closing },
   ]
 

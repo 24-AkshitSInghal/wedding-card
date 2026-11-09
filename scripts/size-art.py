@@ -18,11 +18,13 @@ TARGET = {
     'jasmine_strings': 750, 'lantern_hanging': 140, 'mandap_floral': 750, 'marigold_toran': 1040,
     'palace_terrace': 1500, 'peacock_lookback': 400, 'peacock_standing': 400,
     'red_flower_bush': 1600, 'rose_garland': 960, 'vine_hanging': 330, 'wisteria_hanging': 520,
+    'ganesha': 560, 'monogram': 620,
+    'ganesha': 560, 'monogram': 620,
 }
 
 total = 0
 for name in sorted(os.listdir(SRC)):
-    if not name.endswith('.webp'):
+    if not name.endswith('.webp') or name[:-5] not in TARGET:
         continue
     key = name[:-5]
     im = Image.open(os.path.join(SRC, name)).convert('RGBA')

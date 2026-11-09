@@ -151,16 +151,16 @@ export const BLESSING: ScenePreset = {
   air: air([{ kind: 'petal', colors: ROSE, weight: 3 }, { kind: 'leaf', colors: LEAF, weight: 1 }]),
   enter: 'crane',
   enterDur: 1.0,
-  textTop: 0.075,
+  textTop: 0.035,
   extras: ['fan'],
   layers: [
     { src: 'palace_terrace', w: 125, x: -110, anchor: 'bottom', y: 2, d: -0.2, wing: true },
     { src: 'palace_terrace', w: 125, x: 110, anchor: 'bottom', y: 2, d: -0.2, wing: true, flip: true },
-    { src: 'palace_terrace', w: 128, anchor: 'bottom', y: 4, d: 0 },
-    { src: 'peacock_lookback', w: 28, x: 10, anchor: 'bottom', y: 40, d: 0.15, ambient: 'breathe', role: 'peacock', glint: true },
-    { src: 'peacock_standing', w: 34, x: 30, anchor: 'bottom', y: 8, d: 0.35, flip: true, ambient: 'breathe', delay: -2.5, role: 'peacock', glint: true },
-    { src: 'banana_leaves', w: 50, x: -34, anchor: 'bottom', y: 0, d: 0.65, ambient: 'sway-slow' },
-    { src: 'red_flower_bush', w: 140, anchor: 'bottom', y: -6, d: 0.9, ambient: 'breeze' },
+    { src: 'palace_terrace', w: 128, anchor: 'bottom', y: -16, d: 0 },
+    { src: 'peacock_lookback', w: 22, x: 12, anchor: 'bottom', y: 9, d: 0.15, ambient: 'breathe', role: 'peacock', glint: true },
+    { src: 'peacock_standing', w: 28, x: 32, anchor: 'bottom', y: -10, d: 0.35, flip: true, ambient: 'breathe', delay: -2.5, role: 'peacock', glint: true },
+    { src: 'banana_leaves', w: 44, x: -36, anchor: 'bottom', y: -10, d: 0.65, ambient: 'sway-slow' },
+    { src: 'red_flower_bush', w: 140, anchor: 'bottom', y: -18, d: 0.9, ambient: 'breeze' },
   ],
 }
 
@@ -233,13 +233,13 @@ export const EVENT_SCENES: Record<string, ScenePreset> = {
     shower: 18,
     enter: 'procession',
     enterDur: 1.15,
-    textTop: 0.29,
+    textTop: 0.275,
     layers: [
       ...COLONNADE,
       ARCH,
-      { src: 'jasmine_strings', w: 58, anchor: 'top', y: -18, d: 0.2, ambient: 'sway-slow', role: 'garland' },
-      { src: 'chhatri_large', w: 44, x: 34, anchor: 'bottom', y: 24, d: -0.05 },
-      { src: 'chhatra_umbrella', w: 22, x: -34, anchor: 'bottom', y: 40, d: 0.3, ambient: 'sway', delay: -1 },
+      { src: 'jasmine_strings', w: 58, anchor: 'top', y: -26, d: 0.2, ambient: 'sway-slow', role: 'garland' },
+      { src: 'chhatri_large', w: 40, x: 35, anchor: 'bottom', y: 12, d: -0.05 },
+      { src: 'chhatra_umbrella', w: 21, x: -36, anchor: 'bottom', y: 20, d: 0.3, ambient: 'sway', delay: -1 },
       { src: 'chhatra_umbrella', w: 20, x: 22, anchor: 'bottom', y: 22, d: 0.3, ambient: 'sway', delay: -2.4 },
       BALUSTRADE,
       { src: 'elephant_royal', w: 72, x: -24, anchor: 'bottom', y: 6, d: 0.45, ambient: 'breathe', delay: -3, role: 'walker' },
@@ -290,6 +290,106 @@ export const EVENT_SCENES: Record<string, ScenePreset> = {
 }
 EVENT_SCENES.sangeet = EVENT_SCENES.garba
 
+/* ── Sections beyond the ceremonies (countdown, story, welcomes) ───────────────
+ * Same palace, lighter foliage: these scenes carry more words, so the art stays low. */
+
+/** Golden courtyard for the countdown and scratch card. */
+export const COUNTDOWN: ScenePreset = {
+  palette: { center: '#b8771c', mid: '#a06210', edge: '#5e3404', ink: '#fff3d6', scrim: 0.34 },
+  air: air([{ kind: 'marigold', colors: MARIGOLD, weight: 3 }, { kind: 'petal', colors: ROSE, weight: 1 }]),
+  shower: 14,
+  enter: 'truck',
+  enterDur: 1.0,
+  textTop: 0.28,
+  extras: ['rays'],
+  layers: [
+    ...COLONNADE,
+    ARCH,
+    { src: 'marigold_toran', w: 86, anchor: 'top', y: 12, d: 0.25, ambient: 'sway-slow', role: 'garland' },
+    BALUSTRADE,
+    { src: 'brass_urn', w: 17, x: -37, anchor: 'bottom', y: 4, d: 0.5 },
+    { src: 'brass_urn', w: 17, x: 37, anchor: 'bottom', y: 4, d: 0.5, flip: true },
+    { src: 'banana_leaves', w: 30, x: -44, anchor: 'bottom', y: -8, d: 0.8, ambient: 'sway-slow' },
+    { src: 'banana_leaves', w: 30, x: 44, anchor: 'bottom', y: -8, d: 0.8, flip: true, ambient: 'sway-slow', delay: -2 },
+  ],
+}
+
+/** Our Story, part one: the emerald-olive garden with its peacock. */
+export const STORY_ONE: ScenePreset = {
+  palette: { center: '#7d6d1d', mid: '#64520f', edge: '#2f2604', ink: '#f6e8c0', scrim: 0.22 },
+  air: air([{ kind: 'blossom', colors: PINK, weight: 2 }, { kind: 'leaf', colors: LEAF, weight: 2 }]),
+  enter: 'curtain',
+  enterDur: 1.0,
+  textTop: 0.195,
+  layers: [
+    ...COLONNADE,
+    ARCH,
+    { src: 'vine_hanging', w: 22, x: -36, anchor: 'top', y: -6, d: 0.25, ambient: 'sway', role: 'garland' },
+    { src: 'vine_hanging', w: 20, x: 37, anchor: 'top', y: -6, d: 0.25, flip: true, ambient: 'sway', delay: -2.2, role: 'garland' },
+    BALUSTRADE,
+    { src: 'peacock_standing', w: 20, x: 36, anchor: 'bottom', y: -2, d: 0.45, flip: true, ambient: 'breathe', role: 'peacock', glint: true },
+    { src: 'banana_leaves', w: 34, x: -40, anchor: 'bottom', y: -8, d: 0.7, ambient: 'sway-slow' },
+  ],
+}
+
+/** Our Story, part two: lanterns and string lights for the promise. */
+export const STORY_TWO: ScenePreset = {
+  palette: { center: '#c2561e', mid: '#a84214', edge: '#5c1f05', ink: '#fff3dc', scrim: 0.3 },
+  air: air([{ kind: 'petal', colors: ROSE, weight: 2 }, { kind: 'marigold', colors: MARIGOLD, weight: 1 }], true),
+  shower: 10,
+  enter: 'iris',
+  enterDur: 1.0,
+  textTop: 0.25,
+  extras: ['fairy-lights'],
+  layers: [
+    ...COLONNADE,
+    ARCH,
+    { src: 'lantern_hanging', w: 8, x: -30, anchor: 'top', y: 6, d: 0.25, ambient: 'swing' },
+    { src: 'lantern_hanging', w: 8, x: 30, anchor: 'top', y: 6, d: 0.25, ambient: 'swing', delay: -1.6 },
+    BALUSTRADE,
+    { src: 'banana_leaves', w: 34, x: -40, anchor: 'bottom', y: -8, d: 0.7, ambient: 'sway-slow' },
+    { src: 'banana_leaves', w: 34, x: 40, anchor: 'bottom', y: -8, d: 0.7, flip: true, ambient: 'sway-slow', delay: -3 },
+  ],
+}
+
+/** The children's welcome: jasmine strings and roses on red. */
+export const LITTLE_HEARTS: ScenePreset = {
+  palette: { center: '#ab3a40', mid: '#8d272d', edge: '#4a0f13', ink: '#f8e7c8' },
+  air: air([{ kind: 'blossom', colors: [...JASMINE, ...BLOSSOM], weight: 3 }, { kind: 'petal', colors: PINK, weight: 2 }], true),
+  shower: 22,
+  enter: 'truck',
+  enterDur: 1.0,
+  textTop: 0.275,
+  layers: [
+    ...COLONNADE,
+    ARCH,
+    { src: 'jasmine_strings', w: 62, anchor: 'top', y: -36, d: 0.3, ambient: 'sway-slow', role: 'garland' },
+    { src: 'cypress_pair', w: 20, x: -41, anchor: 'bottom', y: 18, d: -0.1, ambient: 'breeze' },
+    { src: 'cypress_pair', w: 20, x: 41, anchor: 'bottom', y: 18, d: -0.1, flip: true, ambient: 'breeze', delay: -3 },
+    { src: 'brass_urn', w: 18, x: -36, anchor: 'bottom', y: 2, d: 0.55 },
+    { src: 'brass_urn', w: 18, x: 36, anchor: 'bottom', y: 2, d: 0.55, flip: true },
+    { src: 'red_flower_bush', w: 120, anchor: 'bottom', y: -22, d: 0.9, ambient: 'breeze' },
+  ],
+}
+
+/** Family welcome lists: a plum-and-gold hall with a rose garland. */
+export const FAMILY_WELCOME: ScenePreset = {
+  palette: { center: '#8e3550', mid: '#6e2440', edge: '#3a0a1f', ink: '#fbe7d4' },
+  air: air([{ kind: 'petal', colors: ROSE, weight: 2 }, { kind: 'blossom', colors: JASMINE, weight: 1 }]),
+  shower: 12,
+  enter: 'crane',
+  enterDur: 1.0,
+  textTop: 0.235,
+  layers: [
+    ...COLONNADE,
+    ARCH,
+    { src: 'rose_garland', w: 80, anchor: 'top', y: 7, d: 0.25, ambient: 'sway-slow', role: 'garland' },
+    BALUSTRADE,
+    { src: 'brass_urn', w: 16, x: -38, anchor: 'bottom', y: 4, d: 0.5 },
+    { src: 'brass_urn', w: 16, x: 38, anchor: 'bottom', y: 4, d: 0.5, flip: true },
+  ],
+}
+
 /**
  * The closing: a framed final card. A rose garland and vines at the top, the medallion,
  * the families' blessing in clear space, and a flowering border with two peacocks below.
@@ -300,7 +400,7 @@ export const CLOSING: ScenePreset = {
   shower: 30,
   enter: 'lift',
   enterDur: 1.1,
-  textTop: 0.485,
+  textTop: 0.405,
   extras: ['border', 'medallion'],
   layers: [
     { src: 'palace_terrace', w: 125, x: -108, anchor: 'bottom', y: 2, d: -0.3, wing: true },
@@ -310,9 +410,9 @@ export const CLOSING: ScenePreset = {
     { src: 'vine_hanging', w: 17, x: 40, anchor: 'top', y: 0, d: 0.3, flip: true, ambient: 'sway', delay: -3.5 },
     { src: 'banana_leaves', w: 34, x: -40, anchor: 'bottom', y: -8, d: 0.2, ambient: 'sway-slow' },
     { src: 'banana_leaves', w: 34, x: 40, anchor: 'bottom', y: -8, d: 0.2, flip: true, ambient: 'sway-slow', delay: -2 },
-    { src: 'peacock_standing', w: 21, x: -34, anchor: 'bottom', y: -10, d: 0.35, ambient: 'breathe', role: 'peacock', glint: true },
-    { src: 'peacock_standing', w: 21, x: 34, anchor: 'bottom', y: -10, d: 0.35, flip: true, ambient: 'breathe', delay: -2.6, role: 'peacock', glint: true },
-    { src: 'red_flower_bush', w: 118, anchor: 'bottom', y: -18, d: 0.6, ambient: 'breeze' },
+    { src: 'peacock_standing', w: 21, x: -34, anchor: 'bottom', y: -17, d: 0.35, ambient: 'breathe', role: 'peacock', glint: true },
+    { src: 'peacock_standing', w: 21, x: 34, anchor: 'bottom', y: -17, d: 0.35, flip: true, ambient: 'breathe', delay: -2.6, role: 'peacock', glint: true },
+    { src: 'red_flower_bush', w: 118, anchor: 'bottom', y: -21, d: 0.6, ambient: 'breeze' },
   ],
 }
 
@@ -324,4 +424,4 @@ export function presetFor(scene: string, index: number): ScenePreset {
 }
 
 /** Seconds of scroll (in viewport heights) each scene rests before the next begins. */
-export const HOLD = { opening: 0.3, couple: 1.3, blessing: 1.25, event: 1.1, closing: 1.9 }
+export const HOLD = { opening: 0.3, couple: 1.3, blessing: 1.25, event: 1.1, countdown: 1.3, story: 1.4, welcome: 1.3, closing: 1.9 }

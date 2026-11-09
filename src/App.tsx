@@ -1,4 +1,6 @@
 import gsap from 'gsap'
+import { Observer } from 'gsap/Observer'
+import { ScrollToPlugin } from 'gsap/ScrollToPlugin'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
@@ -6,16 +8,20 @@ import { Particles } from './components/Particles'
 import type { ParticlesHandle } from './components/Particles'
 import { Scene } from './components/Scene'
 import { ScreenReaderInvitation } from './components/SceneTexts'
+import { ScreenReaderSections } from './components/SectionTexts'
 import { SoundToggle } from './components/SoundToggle'
 import { wedding } from './config/wedding'
+import { weddingHi } from './config/wedding.hi'
 import { createPreloader, isLiteDevice, whenLoaded } from './engine/preload'
 import { buildScenes } from './engine/schedule'
 import { buildTimeline } from './engine/timeline'
-import { initials } from './lib/format'
+import { artUrl } from './lib/art'
+import { localize, t } from './lib/i18n'
+import type { Lang } from './lib/i18n'
 import './styles/text.css'
 import './styles/scenes.css'
 
-gsap.registerPlugin(ScrollTrigger)
+gsap.registerPlugin(ScrollTrigger, Observer, ScrollToPlugin)
 ScrollTrigger.config({ ignoreMobileResize: true })
 
 /** Only the gateway loads with the page; everything else streams in once it is on screen. */
@@ -26,8 +32,14 @@ const FORCE_REDUCE = new URLSearchParams(window.location.search).has('reduce-mot
 const REDUCE_QUERY = FORCE_REDUCE ? 'all' : '(prefers-reduced-motion: reduce)'
 const MOTION_QUERY = FORCE_REDUCE ? 'not all' : '(prefers-reduced-motion: no-preference)'
 
-export default function App() {
-  const { scenes, total } = useMemo(() => buildScenes(wedding), [])
+interface Props {
+  lang: Lang
+  onToggleLang: () => void
+}
+
+export default function App({ lang, onToggleLang }: Props) {
+  const cfg = useMemo(() => localize(wedding, lang === 'hi' ? weddingHi : null), [lang])
+  const { scenes, total } = useMemo(() => buildScenes(cfg), [cfg])
   const rootRef = useRef<HTMLDivElement>(null)
   const trackRef = useRef<HTMLDivElement>(null)
   const bloomRef = useRef<HTMLDivElement>(null)
@@ -35,7 +47,6 @@ export default function App() {
   const [ready, setReady] = useState(false)
   const [lite, setLite] = useState(isLiteDevice)
   const [reduced, setReduced] = useState(() => window.matchMedia(REDUCE_QUERY).matches)
-  const [b, g] = initials(wedding)
 
   // If the device struggles once the gateway is on screen, fall back to the lighter look.
   useEffect(() => {
@@ -105,6 +116,8 @@ export default function App() {
           }
           if (time >= s.model.start) latest = i
         })
+        // The language switch belongs to the threshold of the palace.
+        root.classList.toggle('at-start', time < scenes[0].exitAt + 0.15)
         if (latest !== shown) {
           // Scrolling forward into a scene greets it with a shower of its flowers.
           const arriving = shown >= 0 && latest > shown
@@ -118,36 +131,15 @@ export default function App() {
       }
       tl.eventCallback('onUpdate', sync)
 
-      // Never leave the guest stranded partway through a short transition: settle in the
-      // direction they were scrolling, or at the nearer end if that one is too far. Long
-      // transitions (the gateway) are left wherever the guest stops.
-      const snapTo = (p: number, self?: ScrollTrigger) => {
-        const T = p * total
-        for (const s of scenes) {
-          if (s.enterDur && T > s.start && T < s.restAt) {
-            if (s.enterDur > 1.5) return p
-            const ahead = s.restAt + 0.02
-            const behind = Math.max(0, s.start - 0.02)
-            const forward = (self?.direction ?? 1) > 0
-            const preferred = forward ? ahead : behind
-            const target = Math.abs(preferred - T) <= 0.7 ? preferred : Math.abs(ahead - T) < Math.abs(behind - T) ? ahead : behind
-            return target / total
-          }
-        }
-        return p
-      }
-
       const st = ScrollTrigger.create({
         trigger: trackRef.current,
         start: 'top top',
         end: 'bottom bottom',
         animation: tl,
-        scrub: m ? 0.85 : 0.3,
+        // The glide itself is eased, so the scene follows the scroll directly (no lag).
+        scrub: m ? 0.12 : true,
         invalidateOnRefresh: true,
         onUpdate: (self) => particles.current?.nudge(self.getVelocity()),
-        snap: m
-          ? { snapTo: (p: number) => snapTo(p, st), duration: { min: 0.3, max: 0.9 }, delay: 0.25, ease: 'power1.inOut', inertia: false }
-          : undefined,
       })
       // Created inside matchMedia after the page has loaded, the trigger is not measured
       // automatically; measure it now so scroll maps onto the timeline from the start.
@@ -167,6 +159,77 @@ export default function App() {
       ScrollTrigger.addEventListener('refresh', onRefresh)
       tl.progress(st.progress)
       sync()
+
+      /* Checkpoints: every swipe, wheel flick or arrow key glides to the next (or previous)
+         scene and comes to rest once its words have appeared. */
+      const stops = scenes.map((s, i) =>
+        i === 0 ? 0 : s.kind === 'closing' ? s.exitAt : Math.min(s.restAt + 0.5, s.exitAt - 0.05),
+      )
+      const span = () => st.end - st.start
+      const timeAt = () => ((window.scrollY - st.start) / span()) * total
+      let glideTween: gsap.core.Tween | null = null
+      let heading: number | null = null
+      let quietUntil = 0
+      let swipeUsed = false
+      const glide = (dir: 1 | -1, redirect = false) => {
+        if (glideTween && !redirect) return
+        if (!glideTween && performance.now() < quietUntil) return
+        // A fresh swipe during a glide carries on from where that glide was heading.
+        const T = glideTween && heading !== null ? heading : timeAt()
+        const target = dir > 0 ? stops.find((x) => x > T + 0.05) : [...stops].reverse().find((x) => x < T - 0.05)
+        if (target === undefined) return
+        glideTween?.kill()
+        heading = target
+        const distance = Math.abs(target - timeAt())
+        glideTween = gsap.to(window, {
+          scrollTo: { y: st.start + (target / total) * span(), autoKill: false },
+          duration: m ? Math.min(2.4, 0.9 + distance * 0.45) : 0.6,
+          // Moves the moment the finger does, then settles gently into the checkpoint.
+          ease: 'power2.out',
+          onComplete: () => {
+            glideTween = null
+            heading = null
+            // Swallow the tail of a trackpad's momentum so one flick moves one scene.
+            quietUntil = performance.now() + 220
+          },
+        })
+      }
+      const isTouch = (o: Observer) => !!o.event && o.event.type.startsWith('touch')
+      const observer = Observer.create({
+        target: window,
+        type: 'wheel,touch',
+        wheelSpeed: -1,
+        tolerance: 6,
+        dragMinimum: 4,
+        preventDefault: true,
+        ignore: '.scratch, .lang-toggle, .sound-toggle, .sr-invitation',
+        onPress: () => {
+          swipeUsed = false
+        },
+        // A touch swipe moves one scene per gesture; a new swipe may redirect a glide.
+        onUp: (o) => {
+          if (isTouch(o)) {
+            if (swipeUsed) return
+            swipeUsed = true
+            glide(1, true)
+          } else glide(1)
+        },
+        onDown: (o) => {
+          if (isTouch(o)) {
+            if (swipeUsed) return
+            swipeUsed = true
+            glide(-1, true)
+          } else glide(-1)
+        },
+      })
+      const onKey = (e: KeyboardEvent) => {
+        if (e.target instanceof HTMLElement && e.target.closest('.sr-invitation, button, a')) return
+        if (['ArrowDown', 'PageDown', ' '].includes(e.key)) glide(1)
+        else if (['ArrowUp', 'PageUp'].includes(e.key)) glide(-1)
+        else return
+        e.preventDefault()
+      }
+      window.addEventListener('keydown', onKey)
       if (import.meta.env.DEV) {
         // Test hook: jump the scene to a timeline position (in scroll units) and render it now.
         const go = (T: number) => {
@@ -174,9 +237,12 @@ export default function App() {
           tl.time(T)
           return tl.time()
         }
-        Object.assign(window, { __invite: { tl, st, scenes, total, ScrollTrigger }, __go: go })
+        Object.assign(window, { __invite: { tl, st, scenes, total, ScrollTrigger, stops, glide, gsap }, __go: go })
       }
       return () => {
+        observer.kill()
+        glideTween?.kill()
+        window.removeEventListener('keydown', onKey)
         ScrollTrigger.removeEventListener('refreshInit', onRefreshInit)
         ScrollTrigger.removeEventListener('refresh', onRefresh)
         st.kill()
@@ -190,37 +256,44 @@ export default function App() {
   }, [scenes, total])
 
   return (
-    <div ref={rootRef} className={`invite${ready ? ' is-ready' : ''}${lite ? ' is-lite' : ''}${reduced ? ' is-reduced' : ''}`}>
+    <div
+      ref={rootRef}
+      lang={lang}
+      className={`invite lang-${lang} at-start${ready ? ' is-ready' : ''}${lite ? ' is-lite' : ''}${reduced ? ' is-reduced' : ''}`}
+    >
       <div ref={trackRef} className="scroll-track" style={{ height: `${(total + 1) * 100}vh` } as CSSProperties} />
 
       {/* The painting. Its words are repeated, in order, by ScreenReaderInvitation below. */}
       <div className="stage" aria-hidden="true">
         {scenes.map((scene, i) => (
-          <Scene key={scene.id} scene={scene} index={i} cfg={wedding} eager={i < EAGER_SCENES} />
+          <Scene key={scene.id} scene={scene} index={i} cfg={cfg} eager={i < EAGER_SCENES} />
         ))}
         <div className="wing-shade left" />
         <div className="wing-shade right" />
       </div>
-      <ScreenReaderInvitation cfg={wedding} />
+      <ScreenReaderInvitation
+        cfg={cfg}
+        beforeEvents={<ScreenReaderSections cfg={cfg} part="before-events" />}
+        afterEvents={<ScreenReaderSections cfg={cfg} part="after-events" />}
+      />
+
+      <button type="button" className="lang-toggle" onClick={onToggleLang} aria-label={t('switchLabel')} lang={lang === 'hi' ? 'en' : 'hi'}>
+        {t('switchTo')}
+      </button>
 
       <div ref={bloomRef} className="bloom" />
       {!reduced && <Particles ref={particles} lite={lite} />}
       <div className="grain" />
 
-      {wedding.audio.src.trim() && ready && <SoundToggle src={wedding.audio.src} title={wedding.audio.title} />}
+      {cfg.audio.src.trim() && ready && <SoundToggle src={cfg.audio.src} title={cfg.audio.title} />}
 
       <div className="veil" role="status" aria-hidden={ready}>
-        <span className="sr-only">Opening the invitation…</span>
+        <span className="sr-only">{t('opening')}</span>
         <div className="veil-mark" aria-hidden="true">
           <svg viewBox="0 0 100 100" aria-hidden="true">
-            <circle cx="50" cy="50" r="44" pathLength={1} />
-            <circle cx="50" cy="50" r="38" pathLength={1} />
+            <circle cx="50" cy="50" r="48" pathLength={1} />
           </svg>
-          <span>
-            {b}
-            <i>&amp;</i>
-            {g}
-          </span>
+          <img src={artUrl('monogram')} alt="" draggable={false} />
         </div>
       </div>
     </div>

@@ -13,8 +13,11 @@ import {
   langFor,
   opensInNewTab,
   safeUrl,
+  telHref,
   weddingDateLine,
 } from '../lib/format'
+import { artUrl } from '../lib/art'
+import { t } from '../lib/i18n'
 import { CalendarIcon, Henna, PinIcon, Rule } from './Ornaments'
 import { SplitText } from './SplitText'
 
@@ -31,7 +34,7 @@ interface BlockProps {
 }
 
 /** Text block positioned inside the frame. `.reveal` children are faded in by the timeline. */
-function TextBlock({ top, width, children }: BlockProps) {
+export function TextBlock({ top, width, children }: BlockProps) {
   return (
     <div className="scene-text" data-d="0" data-role="text" style={{ '--top': top, '--tw': width ?? 74 } as CSSProperties}>
       {children}
@@ -40,7 +43,7 @@ function TextBlock({ top, width, children }: BlockProps) {
 }
 
 /** A line that may be a placeholder (dimmed) or hidden entirely. */
-function Line({ value, placeholder, cfg, className }: { value?: string; placeholder: string; cfg: WeddingConfig; className: string }) {
+export function Line({ value, placeholder, cfg, className }: { value?: string; placeholder: string; cfg: WeddingConfig; className: string }) {
   const text = field(value, placeholder, cfg)
   if (text === null) return null
   const isPlaceholder = !(value ?? '').trim()
@@ -49,7 +52,7 @@ function Line({ value, placeholder, cfg, className }: { value?: string; placehol
 
 function eventTime(ev: WeddingEvent) {
   if (!ev.time.trim()) return ''
-  const suffix = ev.timeSuffix === undefined ? 'onwards' : ev.timeSuffix.trim()
+  const suffix = ev.timeSuffix === undefined ? t('onwards') : ev.timeSuffix.trim()
   return suffix ? `${formatTime(ev.time)} ${suffix}` : formatTime(ev.time)
 }
 
@@ -72,28 +75,37 @@ export function CoupleText({ cfg, top }: { cfg: WeddingConfig; top: number }) {
       <p className="reveal t-invite">{cfg.coupleInvite}</p>
       <Line value={weddingDateLine(cfg)} placeholder="Wedding Date" cfg={cfg} className="t-date" />
       <Line value={cfg.location} placeholder="Venue" cfg={cfg} className="t-location" />
+      {cfg.hashtag.trim() && <p className="reveal t-hashtag">{cfg.hashtag}</p>}
     </TextBlock>
   )
 }
 
-function parentsLine(prefix: string, value: string, who: string, cfg: WeddingConfig) {
+function parentsLine(prefix: string, value: string, who: string, cfg: WeddingConfig, city = '') {
   const text = field(value, `${who}'s Parents`, cfg)
   if (text === null) return null
-  return { text: `(${prefix} ${text})`, placeholder: !value.trim() }
+  const from = city.trim() ? `, ${city.trim()}` : ''
+  return { text: `(${prefix} ${text}${from})`, placeholder: !value.trim() }
 }
 
 export function BlessingText({ cfg, top }: { cfg: WeddingConfig; top: number }) {
   const [shortBride, shortGroom] = coupleNames(cfg)
   const bride = cfg.bride.fullName.trim() || shortBride
   const groom = cfg.groom.fullName.trim() || shortGroom
-  const bp = parentsLine(cfg.brideParentsPrefix, cfg.bride.parents, 'Bride', cfg)
-  const gp = parentsLine(cfg.groomParentsPrefix, cfg.groom.parents, 'Groom', cfg)
+  const bp = parentsLine(cfg.brideParentsPrefix, cfg.bride.parents, 'Bride', cfg, cfg.bride.city)
+  const gp = parentsLine(cfg.groomParentsPrefix, cfg.groom.parents, 'Groom', cfg, cfg.groom.city)
   return (
     <TextBlock top={top} width={82}>
+      {/* Shri Ganesh heads the formal invitation, as on every traditional card. */}
+      <div className="reveal blessing-ganesha">
+        <img data-src={artUrl('ganesha')} alt="" draggable={false} />
+      </div>
       {cfg.invocation.trim() && (
         <p className="reveal t-invocation" lang={langFor(cfg.invocation)}>
           {cfg.invocation}
         </p>
+      )}
+      {cfg.invocation.trim() && cfg.invocationMeaning.trim() && (
+        <p className="reveal t-invocation-meaning">{cfg.invocationMeaning}</p>
       )}
       <p className="reveal t-message">{cfg.invitationMessage}</p>
       {bride && (
@@ -128,9 +140,10 @@ export function EventText({ cfg, ev, uid, top, henna }: { cfg: WeddingConfig; ev
       <p className="t-event-title gilt">
         <SplitText text={ev.title} />
       </p>
+      {ev.note?.trim() && <p className="reveal t-event-note">{ev.note}</p>}
       <Line value={ev.date.trim() ? formatDate(ev.date) : ''} placeholder="Date" cfg={cfg} className="t-event-date" />
       <Line value={time} placeholder="Time" cfg={cfg} className="t-event-time" />
-      {venue !== null && <p className="reveal t-venue-label">Venue</p>}
+      {venue !== null && <p className="reveal t-venue-label">{t('venue')}</p>}
       <Line value={ev.venue} placeholder="Venue" cfg={cfg} className="t-venue" />
       {ev.address?.trim() && <p className="reveal t-address">{ev.address}</p>}
       {(map || showCalendar) && (
@@ -138,13 +151,13 @@ export function EventText({ cfg, ev, uid, top, henna }: { cfg: WeddingConfig; ev
           {map && (
             <a className="t-link" href={map} target="_blank" rel="noopener noreferrer" tabIndex={-1}>
               <PinIcon />
-              View venue
+              {t('viewVenue')}
             </a>
           )}
           {showCalendar && (
             <button type="button" className="t-link" tabIndex={-1} onClick={() => addToCalendar(ev, cfg, uid)}>
               <CalendarIcon />
-              Add to calendar
+              {t('addToCalendar')}
             </button>
           )}
         </p>
@@ -170,6 +183,17 @@ export function ClosingText({ cfg, top }: { cfg: WeddingConfig; top: number }) {
       <Rule />
       <p className="reveal t-closing-msg">{cfg.closing.message}</p>
       {cfg.closing.blessing.trim() && <p className="reveal t-blessing">{cfg.closing.blessing}</p>}
+      {cfg.rsvp.contacts.length > 0 && (
+        <div className="reveal t-contacts">
+          <p className="t-contacts-label">{t('rsvp')}</p>
+          {cfg.rsvp.contacts.map((c) => (
+            <a key={c.phone} className="t-contact" href={telHref(c.phone)} tabIndex={-1}>
+              <span>{c.name}</span>
+              <span className="t-phone">{c.phone}</span>
+            </a>
+          ))}
+        </div>
+      )}
       {rsvp && (
         <p className="reveal t-rsvp">
           <a
@@ -190,15 +214,23 @@ export function ClosingText({ cfg, top }: { cfg: WeddingConfig; top: number }) {
  * The whole invitation as plain, ordered, semantic HTML. It is visually hidden, but its
  * links and buttons appear as a small chip when focused, so keyboard guests can use them.
  */
-export function ScreenReaderInvitation({ cfg }: { cfg: WeddingConfig }) {
+export function ScreenReaderInvitation({
+  cfg,
+  beforeEvents,
+  afterEvents,
+}: {
+  cfg: WeddingConfig
+  beforeEvents?: ReactNode
+  afterEvents?: ReactNode
+}) {
   const [bride, groom] = coupleNames(cfg)
   const [bf, gf] = familyNames(cfg)
   const date = weddingDateLine(cfg)
   const rsvp = safeUrl(cfg.rsvp.url)
   // Placeholders are for the person editing the invitation, not for screen-reader guests.
   const real = (v: string | null) => (v && !v.startsWith('[') ? v : null)
-  const bp = parentsLine(cfg.brideParentsPrefix, cfg.bride.parents, 'Bride', cfg)
-  const gp = parentsLine(cfg.groomParentsPrefix, cfg.groom.parents, 'Groom', cfg)
+  const bp = parentsLine(cfg.brideParentsPrefix, cfg.bride.parents, 'Bride', cfg, cfg.bride.city)
+  const gp = parentsLine(cfg.groomParentsPrefix, cfg.groom.parents, 'Groom', cfg, cfg.groom.city)
   const families = joinNames(real(bf), real(gf))
   return (
     <main className="sr-invitation">
@@ -207,9 +239,11 @@ export function ScreenReaderInvitation({ cfg }: { cfg: WeddingConfig }) {
       <p>{cfg.coupleInvite}</p>
       {date && <p>{date}</p>}
       {cfg.location.trim() && <p>{cfg.location}</p>}
+      {cfg.hashtag.trim() && <p>{cfg.hashtag}</p>}
 
       <section>
         {cfg.invocation.trim() && <p lang={langFor(cfg.invocation)}>{cfg.invocation}</p>}
+        {cfg.invocation.trim() && cfg.invocationMeaning.trim() && <p>{cfg.invocationMeaning}</p>}
         <p>{cfg.invitationMessage}</p>
         {(cfg.bride.fullName.trim() || real(bride)) && (
           <p>
@@ -223,34 +257,48 @@ export function ScreenReaderInvitation({ cfg }: { cfg: WeddingConfig }) {
         )}
       </section>
 
+      {beforeEvents}
+
       {cfg.events.map((ev, i) => {
         const map = safeUrl(ev.mapUrl)
         return (
           <section key={eventUid(ev, i)}>
             <h2>{ev.title}</h2>
+            {ev.note?.trim() && <p>{ev.note}</p>}
             {ev.date.trim() && <p>{formatDate(ev.date)}</p>}
             {ev.time.trim() && <p>{eventTime(ev)}</p>}
-            {ev.venue.trim() && <p>Venue: {ev.venue}</p>}
+            {ev.venue.trim() && (
+              <p>
+                {t('venue')}: {ev.venue}
+              </p>
+            )}
             {ev.address?.trim() && <p>{ev.address}</p>}
             {map && (
               <a href={map} target="_blank" rel="noopener noreferrer">
-                View venue for {ev.title}
+                {t('viewVenue')} – {ev.title}
               </a>
             )}
             {canAddToCalendar(ev, cfg) && (
               <button type="button" onClick={() => addToCalendar(ev, cfg, eventUid(ev, i))}>
-                Add {ev.title} to calendar
+                {t('addToCalendar')} – {ev.title}
               </button>
             )}
           </section>
         )
       })}
 
+      {afterEvents}
+
       <section>
         <h2>{cfg.closing.lead}</h2>
         {families && <p>{families}</p>}
         <p>{cfg.closing.message}</p>
         {cfg.closing.blessing.trim() && <p>{cfg.closing.blessing}</p>}
+        {cfg.rsvp.contacts.map((c) => (
+          <a key={c.phone} href={telHref(c.phone)}>
+            {t('rsvp')}: {c.name}, {c.phone}
+          </a>
+        ))}
         {rsvp && (
           <a href={rsvp} {...(opensInNewTab(rsvp) ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>
             {cfg.rsvp.label}

@@ -1,12 +1,14 @@
 import type { CSSProperties } from 'react'
 import type { WeddingConfig } from '../config/wedding'
 import type { SceneModel } from '../engine/schedule'
-import { eventUid, initials } from '../lib/format'
+import { eventUid } from '../lib/format'
+import { t } from '../lib/i18n'
 import { Gateway } from './Gateway'
 import { artUrl } from '../lib/art'
 import { Layer } from './Layer'
 import { Doves, FairyLights, Fans, FrameBorder, Medallion } from './Ornaments'
 import { BlessingText, ClosingText, CoupleText, EventText } from './SceneTexts'
+import { CountdownText, FamilyWelcomeText, LittleHeartsText, StoryText } from './SectionTexts'
 
 interface Props {
   scene: SceneModel
@@ -27,7 +29,6 @@ export function Scene({ scene, index, cfg, eager }: Props) {
     '--ink': pal.ink,
     '--scrim': pal.scrim ?? 0.16,
   } as CSSProperties
-  const [i1, i2] = initials(cfg)
 
   return (
     <section
@@ -47,10 +48,10 @@ export function Scene({ scene, index, cfg, eager }: Props) {
 
         {scene.kind === 'opening' && (
           <>
-            <Gateway initials={[i1, i2]} />
+            <Gateway />
             <Doves />
             <div className="scroll-hint" aria-hidden="true">
-              <span>Scroll to enter</span>
+              <span>{t('scrollToEnter')}</span>
               <i />
             </div>
           </>
@@ -62,12 +63,7 @@ export function Scene({ scene, index, cfg, eager }: Props) {
         {extras.has('medallion') && <div className="final-glow" />}
         {extras.has('medallion') && (
           <Medallion>
-            <img className="medallion-emblem" data-src={artUrl('emblem_buta')} alt="" draggable={false} />
-            <span className="medallion-initials">
-              {i1}
-              <span className="amp">&amp;</span>
-              {i2}
-            </span>
+            <img className="medallion-mono" data-src={artUrl('monogram')} alt="" draggable={false} />
           </Medallion>
         )}
 
@@ -82,6 +78,10 @@ export function Scene({ scene, index, cfg, eager }: Props) {
             henna={extras.has('henna')}
           />
         )}
+        {scene.kind === 'countdown' && <CountdownText cfg={cfg} top={preset.textTop} />}
+        {scene.kind === 'story' && <StoryText cfg={cfg} chapters={scene.chapters ?? []} intro={scene.intro} top={preset.textTop} />}
+        {scene.kind === 'little' && <LittleHeartsText cfg={cfg} top={preset.textTop} />}
+        {scene.kind === 'welcome' && <FamilyWelcomeText cfg={cfg} top={preset.textTop} />}
         {scene.kind === 'closing' && <ClosingText cfg={cfg} top={preset.textTop} />}
       </div>
     </section>

@@ -1,4 +1,5 @@
 import type { WeddingConfig, WeddingEvent } from '../config/wedding'
+import { getLang } from './i18n'
 
 const MONTHS = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -28,10 +29,13 @@ export function ordinal(n: number): string {
   return `${n}${['th', 'st', 'nd', 'rd'][n % 10] ?? 'th'}`
 }
 
-/** "2027-01-26" → "26th January, 2027". Anything else is shown exactly as written. */
+const MONTHS_HI = ['जनवरी', 'फ़रवरी', 'मार्च', 'अप्रैल', 'मई', 'जून', 'जुलाई', 'अगस्त', 'सितंबर', 'अक्टूबर', 'नवंबर', 'दिसंबर']
+
+/** "2027-01-26" → "26th January, 2027" (or "26 जनवरी 2027"). Anything else is shown as written. */
 export function formatDate(iso: string): string {
   const p = parseDate(iso)
   if (!p) return iso.trim()
+  if (getLang() === 'hi') return `${p.d} ${MONTHS_HI[p.m - 1]} ${p.y}`
   return `${ordinal(p.d)} ${MONTHS[p.m - 1]}, ${p.y}`
 }
 
@@ -39,6 +43,11 @@ export function formatDate(iso: string): string {
 export function formatTime(hhmm: string): string {
   const t = parseTime(hhmm)
   if (!t) return hhmm.trim()
+  if (getLang() === 'hi') {
+    // Hindi names the part of the day: सुबह, दोपहर, शाम, रात — "शाम 7:00 बजे".
+    const part = t.h >= 4 && t.h < 12 ? 'सुबह' : t.h < 16 && t.h >= 12 ? 'दोपहर' : t.h >= 16 && t.h < 20 ? 'शाम' : 'रात'
+    return `${part} ${((t.h + 11) % 12) + 1}:${String(t.m).padStart(2, '0')} बजे`
+  }
   return `${((t.h + 11) % 12) + 1}:${String(t.m).padStart(2, '0')} ${t.h >= 12 ? 'PM' : 'AM'}`
 }
 
@@ -100,6 +109,12 @@ export function safeUrl(raw: string): string | null {
 }
 
 export const opensInNewTab = (url: string) => /^https?:/i.test(url)
+
+/** "9412583551" → "tel:+919412583551" (10-digit numbers are taken as Indian mobiles). */
+export function telHref(phone: string): string {
+  const digits = phone.replace(/[^\d+]/g, '')
+  return `tel:${/^\d{10}$/.test(digits) ? `+91${digits}` : digits}`
+}
 
 /* ── Calendar ─────────────────────────────────────────────────────────────── */
 
@@ -216,4 +231,68 @@ export function addToCalendar(ev: WeddingEvent, cfg: WeddingConfig, uid: string)
 /** Text written in Devanagari should be announced with a Hindi voice. */
 export function langFor(text: string): string | undefined {
   return /[ऀ-ॣ०-ॿ]/.test(text) ? 'hi' : undefined
+}
+
+/* ── The wedding day as a whole (countdown, whole-day calendar entry) ─────── */
+
+/** When the celebrations begin: the earliest dated event, at its time if one is set,
+ *  otherwise at the start of that day, in the wedding's timezone. */
+export function weddingStart(cfg: WeddingConfig): Date | null {
+  const dated = cfg.events
+    .map((e) => ({ d: parseDate(e.date), t: parseTime(e.time) }))
+    .filter((x): x is { d: NonNullable<typeof x.d>; t: ReturnType<typeof parseTime> } => !!x.d)
+    .sort((a, b) => Date.UTC(a.d.y, a.d.m - 1, a.d.d, a.t?.h ?? 0, a.t?.m ?? 0) - Date.UTC(b.d.y, b.d.m - 1, b.d.d, b.t?.h ?? 0, b.t?.m ?? 0))
+  const first = dated[0]
+  if (!first) return null
+  const naive = Date.UTC(first.d.y, first.d.m - 1, first.d.d, first.t?.h ?? 0, first.t?.m ?? 0)
+  return new Date(naive - zoneOffsetMinutes(cfg.timezone, new Date(naive)) * 60_000)
+}
+
+/** Whole days, hours, minutes and seconds until `target` (all zero once it has passed). */
+export function timeUntil(target: Date, now = Date.now()) {
+  const s = Math.max(0, Math.floor((target.getTime() - now) / 1000))
+  return { days: Math.floor(s / 86400), hours: Math.floor((s % 86400) / 3600), minutes: Math.floor((s % 3600) / 60), seconds: s % 60, done: s === 0 }
+}
+
+/** The first event's date, for a whole-day "save the date" entry. */
+function weddingDay(cfg: WeddingConfig) {
+  const days = cfg.events.map((e) => parseDate(e.date)).filter((d) => !!d).sort((a, b) => Date.UTC(a!.y, a!.m - 1, a!.d) - Date.UTC(b!.y, b!.m - 1, b!.d))
+  return days[0] ?? null
+}
+
+export const canSaveTheDate = (cfg: WeddingConfig) => !!weddingDay(cfg)
+
+/** Adds the wedding day (all day) to the guest's calendar. */
+export function saveTheDate(cfg: WeddingConfig) {
+  const d = weddingDay(cfg)
+  if (!d) return
+  const ymd = (date: Date) => date.toISOString().slice(0, 10).replace(/-/g, '')
+  const start = new Date(Date.UTC(d.y, d.m - 1, d.d))
+  const end = new Date(start.getTime() + 86_400_000)
+  const couple = joinNames(cfg.bride.name.trim() || null, cfg.groom.name.trim() || null)
+  const title = couple ? `Wedding of ${couple}` : 'Wedding celebration'
+  const venue = cfg.events.find((e) => e.venue.trim())?.venue ?? ''
+  const ios = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+  if (ios) {
+    const esc = (s: string) => s.replace(/[\\,;]/g, (c) => `\\${c}`)
+    const ics = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//Royal Wedding Invitation//EN',
+      'BEGIN:VEVENT',
+      `UID:wedding-${ymd(start)}@royal-wedding`,
+      `DTSTAMP:${toUtcStamp(new Date())}`,
+      `DTSTART;VALUE=DATE:${ymd(start)}`,
+      `DTEND;VALUE=DATE:${ymd(end)}`,
+      fold(`SUMMARY:${esc(title)}`),
+      ...(venue ? [fold(`LOCATION:${esc(venue)}`)] : []),
+      'END:VEVENT',
+      'END:VCALENDAR',
+    ].join('\r\n') + '\r\n'
+    window.location.href = `data:text/calendar;charset=utf-8,${encodeURIComponent(ics)}`
+    return
+  }
+  const params = new URLSearchParams({ action: 'TEMPLATE', text: title, dates: `${ymd(start)}/${ymd(end)}`, ctz: cfg.timezone })
+  if (venue) params.set('location', venue)
+  window.open(`https://calendar.google.com/calendar/render?${params}`, '_blank', 'noopener')
 }

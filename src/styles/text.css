@@ -3,7 +3,7 @@
 .scene-text {
   position: absolute;
   left: 50%;
-  top: calc(var(--fh) * var(--top));
+  top: calc(var(--fh) * var(--top) + var(--tall) * 0.42);
   width: calc(var(--u) * var(--tw, 74));
   margin-left: calc(var(--u) * var(--tw, 74) / -2);
   z-index: calc(var(--zs) + 40);
@@ -350,4 +350,280 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* Devanagari must not be letter-spaced or upper-cased (it breaks the conjuncts). */
+.scene-text [lang='hi'] {
+  font-family: 'Noto Serif Devanagari', 'Kohinoor Devanagari', 'Devanagari Sangam MN', serif;
+  font-size: clamp(15px, calc(var(--u) * 4.4), 24px);
+  letter-spacing: 0;
+  text-transform: none;
+  margin-bottom: 0.1em !important;
+}
+.t-invocation-meaning {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: clamp(13px, calc(var(--u) * 3.4), 18px);
+  margin-bottom: 0.9em !important;
+}
+.t-hashtag {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: clamp(14px, calc(var(--u) * 3.8), 20px);
+  margin-top: 0.4em !important;
+}
+.t-event-note {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: clamp(14px, calc(var(--u) * 3.9), 21px);
+  line-height: 1.3;
+  margin-bottom: 0.2em !important;
+  text-wrap: balance;
+}
+.t-contacts {
+  margin-top: 1em !important;
+  pointer-events: auto;
+}
+.t-contacts-label {
+  font-family: var(--caps);
+  font-size: clamp(9.5px, calc(var(--u) * 2.2), 12px);
+  letter-spacing: 0.32em;
+  margin-bottom: 0.3em !important;
+}
+.t-contact {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+  font-family: var(--serif);
+  font-size: clamp(12.5px, calc(var(--u) * 3.2), 17px);
+  line-height: 1.45;
+}
+.t-contact .t-phone {
+  font-family: var(--caps);
+  font-size: 0.85em;
+  letter-spacing: 0.06em;
+  margin-left: 0.5em;
+  border-bottom: 1px solid rgb(231 194 124 / 0.5);
+}
+
+/* ── Countdown & scratch card ────────────────────────────────────────────── */
+
+.t-countdown-title {
+  font-family: var(--script);
+  font-size: clamp(24px, calc(var(--u) * 6.9), 40px);
+  line-height: 1.1;
+  margin-bottom: 0.35em !important;
+}
+.countdown {
+  display: flex;
+  justify-content: center;
+  gap: calc(var(--u) * 2.2);
+}
+.cd-unit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: calc(var(--u) * 14);
+  padding: 0.55em 0.3em 0.45em;
+  border: 1px solid rgb(231 194 124 / 0.55);
+  border-radius: calc(var(--u) * 1.6);
+  background: rgb(40 10 6 / 0.28);
+}
+.cd-num {
+  font-family: var(--caps);
+  font-weight: 600;
+  font-size: clamp(20px, calc(var(--u) * 6.8), 38px);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--gold-hi);
+}
+.cd-label {
+  font-family: var(--caps);
+  font-size: clamp(8px, calc(var(--u) * 2), 11px);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  margin-top: 0.5em;
+}
+.scratch {
+  position: relative;
+  width: calc(var(--u) * 64);
+  height: calc(var(--u) * 19);
+  margin: 1.2em auto 0 !important;
+  border-radius: calc(var(--u) * 2);
+  overflow: hidden;
+  pointer-events: auto;
+  box-shadow: 0 6px 18px rgb(0 0 0 / 0.25), inset 0 0 0 1px rgb(231 194 124 / 0.6);
+  background: rgb(60 14 10 / 0.55);
+}
+.scratch-under {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25em;
+}
+.scratch-kicker {
+  font-family: var(--caps);
+  font-size: clamp(9px, calc(var(--u) * 2.3), 12px);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+.scratch-date {
+  font-family: var(--caps);
+  font-weight: 600;
+  font-size: clamp(13px, calc(var(--u) * 3.9), 21px);
+  letter-spacing: 0.05em;
+  color: var(--gold-hi);
+}
+.scratch-foil {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  cursor: grab;
+  transition: opacity 0.9s ease;
+}
+.scratch.is-revealed .scratch-foil {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ── Story, little hearts, welcome lists ────────────────────────────────── */
+
+.t-story-intro {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: clamp(14px, calc(var(--u) * 3.8), 21px);
+  line-height: 1.32;
+  text-wrap: balance;
+}
+.chapter + .chapter {
+  margin-top: 0.7em;
+}
+.t-chapter-title {
+  font-family: var(--script);
+  font-size: clamp(24px, calc(var(--u) * 6.8), 40px);
+  line-height: 1;
+}
+.t-chapter-text {
+  font-family: var(--serif);
+  font-size: clamp(14px, calc(var(--u) * 3.85), 21px);
+  line-height: 1.3;
+  text-wrap: balance;
+}
+.t-little-names {
+  font-family: var(--script);
+  font-size: clamp(26px, calc(var(--u) * 7.4), 44px);
+  line-height: 1.15;
+  margin: 0.2em 0 0.25em !important;
+}
+.t-little-msg {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: clamp(14px, calc(var(--u) * 3.85), 21px);
+  line-height: 1.36;
+  text-wrap: balance;
+}
+.t-little-msg + .t-little-msg {
+  margin-top: 0.55em !important;
+}
+.t-welcome-title {
+  font-family: var(--script);
+  font-size: clamp(24px, calc(var(--u) * 6.6), 40px);
+  line-height: 1.15;
+  margin-bottom: 0.2em !important;
+}
+.name-list {
+  list-style: none;
+  padding: 0;
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: clamp(15px, calc(var(--u) * 4.2), 23px);
+  line-height: 1.5;
+}
+.name-list.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 1.2em;
+}
+.name-list.two-col li:nth-child(odd) {
+  text-align: right;
+}
+.name-list.two-col li:nth-child(even) {
+  text-align: left;
+}
+
+.t-story-title {
+  font-size: clamp(28px, calc(var(--u) * 8.6), 50px);
+  margin-bottom: 0.15em !important;
+}
+
+.t-mantra {
+  margin-bottom: 0.35em !important;
+}
+
+/* ── हिन्दी ─────────────────────────────────────────────────────────────────
+   Devanagari is never letter-spaced, upper-cased or slanted; names and titles use the
+   high-contrast Rozha One, everything else Tiro Devanagari Hindi. */
+.lang-hi {
+  --caps: 'Tiro Devanagari Hindi', var(--serif);
+  --script: 'Rozha One', 'Tiro Devanagari Hindi', serif;
+}
+.lang-hi .scene-text,
+.lang-hi .scene-text * {
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+  font-style: normal !important;
+}
+.lang-hi .scene-text {
+  font-family: 'Tiro Devanagari Hindi', var(--serif);
+  line-height: 1.5;
+}
+.lang-hi .t-names { font-size: clamp(30px, calc(var(--u) * 9.5), 56px); line-height: 1.25; }
+.lang-hi .t-event-title { font-family: 'Rozha One', serif; font-size: clamp(30px, calc(var(--u) * 9), 52px); line-height: 1.25; }
+.lang-hi .t-fullname { font-family: 'Rozha One', serif; font-size: clamp(24px, calc(var(--u) * 7), 40px); }
+.lang-hi .t-families,
+.lang-hi .t-little-names { font-size: clamp(26px, calc(var(--u) * 7.6), 44px); line-height: 1.3; }
+.lang-hi .t-chapter-title,
+.lang-hi .t-welcome-title,
+.lang-hi .t-countdown-title { font-size: clamp(22px, calc(var(--u) * 6.2), 36px); line-height: 1.3; }
+.lang-hi .t-message { font-size: clamp(13px, calc(var(--u) * 3.6), 19px); line-height: 1.6; }
+.lang-hi .t-caps,
+.lang-hi .t-with-love { font-size: clamp(14px, calc(var(--u) * 3.8), 20px); }
+.lang-hi .t-parents,
+.lang-hi .t-venue-label,
+.lang-hi .cd-label,
+.lang-hi .scratch-kicker,
+.lang-hi .t-contacts-label { font-size: clamp(12px, calc(var(--u) * 3.1), 16px); }
+.lang-hi .t-story-intro,
+.lang-hi .t-chapter-text,
+.lang-hi .t-little-msg { font-size: clamp(13.5px, calc(var(--u) * 3.6), 20px); line-height: 1.55; }
+.lang-hi .scroll-hint,
+.lang-hi .scroll-hint * {
+  font-family: 'Tiro Devanagari Hindi', serif;
+  letter-spacing: 0.04em;
+  text-transform: none;
+}
+
+/* Shri Ganesh at the head of the blessings, with a soft halo of lamplight. */
+.blessing-ganesha {
+  position: relative;
+  width: calc(var(--u) * 24);
+  margin: 0 auto 0.5em !important;
+}
+.blessing-ganesha::before {
+  content: '';
+  position: absolute;
+  inset: -18%;
+  z-index: -1;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgb(255 214 140 / 0.45), rgb(255 190 100 / 0.12) 50%, transparent 70%);
+}
+.blessing-ganesha img {
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 3px 6px rgb(30 6 4 / 0.5));
 }

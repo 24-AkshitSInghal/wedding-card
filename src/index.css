@@ -6,6 +6,8 @@
 @import '@fontsource/cormorant-garamond/400-italic.css';
 @import '@fontsource/cormorant-garamond/500-italic.css';
 @import '@fontsource/pinyon-script/400.css';
+@import '@fontsource/tiro-devanagari-hindi/400.css';
+@import '@fontsource/rozha-one/400.css';
 
 :root {
   --gold-hi: #fff2cf;
@@ -19,6 +21,8 @@
   --fh: 100vh;
   --fw: min(100vw, calc(var(--fh) * 0.5625));
   --u: calc(var(--fw) / 100);
+  /* Height beyond the 9:16 composition on tall phones; text settles lower into it. */
+  --tall: max(0px, var(--fh) - var(--fw) * 1.7778);
 
   --serif: 'Cormorant Garamond', 'Cormorant', Georgia, serif;
   --caps: 'Cinzel', 'Trajan Pro', Georgia, serif;
@@ -160,6 +164,9 @@ img {
 }
 .layer.top {
   top: calc(var(--u) * var(--y) + var(--fh) * var(--yh));
+}
+.layer.top.role-emblem {
+  top: calc(var(--u) * var(--y) + var(--fh) * var(--yh) + var(--tall) * 0.3);
 }
 .layer.bottom-at {
   bottom: calc(var(--fh) * (1 - var(--yh)) + var(--u) * var(--y));

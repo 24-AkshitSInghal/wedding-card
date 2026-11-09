@@ -95,43 +95,34 @@
   background: linear-gradient(270deg, rgb(20 10 5 / 0.85), rgb(20 10 5 / 0.35));
 }
 
-/* The monogram seal hung across the closed doors. */
+/* The couple's monogram hung as a seal across the closed doors. */
 .plaque {
   position: absolute;
-  left: 50%;
-  top: 31%;
-  width: 78%;
+  left: -4%;
+  right: -4%;
+  top: 13%;
   aspect-ratio: 1;
-  translate: -50% -50%;
-  display: grid;
-  place-items: center;
-  filter: drop-shadow(0 4px 10px rgb(0 0 0 / 0.45));
+  filter: drop-shadow(0 4px 10px rgb(0 0 0 / 0.5));
   opacity: 0;
   transition: opacity 1.4s 0.6s ease;
 }
 .is-ready .plaque {
   opacity: 1;
 }
-.plaque svg {
+.plaque-seal {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
 }
-.plaque-initials {
-  position: relative;
-  font-family: var(--script);
-  font-size: calc(var(--u) * 6.4);
-  color: var(--gold-hi);
-  line-height: 1;
-  letter-spacing: 0.02em;
-  text-shadow: 0 1px 2px rgb(40 6 4 / 0.6);
+.plaque img {
+  position: absolute;
+  left: 9%;
+  top: 11%;
+  width: 82%;
+  height: auto;
 }
-.plaque-initials .amp {
-  font-size: 0.62em;
-  margin: 0 0.12em;
-  opacity: 0.9;
-}
+
 
 /* Light sweeping across the carved stone once the page has loaded. */
 .scene--opening .gate::after {
@@ -310,12 +301,12 @@
 .medallion {
   position: absolute;
   left: 50%;
-  top: calc(var(--fh) * 0.272);
-  width: calc(var(--u) * 42);
+  top: calc(var(--fh) * 0.235 + var(--tall) * 0.3);
+  width: calc(var(--u) * 36);
   aspect-ratio: 1;
   /* Centred with margins: GSAP owns this element's transform (it resets CSS translate). */
-  margin-left: calc(var(--u) * -21);
-  margin-top: calc(var(--u) * -21);
+  margin-left: calc(var(--u) * -18);
+  margin-top: calc(var(--u) * -18);
   z-index: calc(var(--zs) + 34);
   filter: drop-shadow(0 10px 22px rgb(0 0 0 / 0.45));
 }
@@ -335,6 +326,11 @@
   justify-content: center;
   gap: 4%;
 }
+.medallion-mono {
+  width: 118%;
+  max-width: none;
+  height: auto;
+}
 .medallion-emblem {
   height: 70%;
   width: auto;
@@ -342,7 +338,7 @@
 }
 .medallion-initials {
   font-family: var(--script);
-  font-size: calc(var(--u) * 4.6);
+  font-size: calc(var(--u) * 4.2);
   color: var(--gold-hi);
   line-height: 1;
 }
@@ -378,8 +374,8 @@
 }
 .veil-mark {
   position: relative;
-  width: 112px;
-  height: 112px;
+  width: min(62vw, 300px);
+  aspect-ratio: 1;
   display: grid;
   place-items: center;
   color: var(--gold);
@@ -389,24 +385,19 @@
   inset: 0;
   fill: none;
   stroke: currentColor;
-  stroke-width: 0.8;
+  stroke-width: 0.6;
   stroke-dasharray: 1;
   animation: veil-draw 2.4s ease-in-out infinite alternate;
   rotate: -90deg;
 }
-.veil-mark circle:last-child {
-  stroke-width: 0.4;
-  opacity: 0.6;
+.veil-mark img {
+  width: 84%;
+  height: auto;
+  animation: veil-breathe 3s ease-in-out infinite alternate;
 }
-.veil-mark span {
-  font-family: var(--script);
-  font-size: 34px;
-  color: var(--gold-hi);
-}
-.veil-mark i {
-  font-style: normal;
-  font-size: 0.6em;
-  margin: 0 0.15em;
+@keyframes veil-breathe {
+  from { opacity: 0.75; scale: 0.97; }
+  to { opacity: 1; scale: 1; }
 }
 @keyframes veil-draw {
   from { stroke-dashoffset: 1; }
@@ -513,3 +504,38 @@
 }
 .fb-left { left: calc(var(--c) * 4 / 60 - 0.75px); }
 .fb-right { right: calc(var(--c) * 4 / 60 - 0.75px); scale: -1 1; }
+
+/* ── Language switch (shown at the palace gate) ──────────────────────────── */
+
+.lang-toggle {
+  position: fixed;
+  top: calc(14px + env(safe-area-inset-top, 0px));
+  right: calc(14px + env(safe-area-inset-right, 0px));
+  z-index: 600;
+  padding: 0.55em 1.15em 0.5em;
+  border: 1px solid rgb(231 194 124 / 0.7);
+  border-radius: 999px;
+  background: rgb(40 8 10 / 0.6);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  color: var(--gold-hi);
+  font: 500 15px/1.2 'Tiro Devanagari Hindi', var(--serif);
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgb(0 0 0 / 0.35);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.6s ease, visibility 0s 0.6s;
+}
+.invite:not(.lang-hi) .lang-toggle {
+  font-size: 16px;
+}
+.is-ready.at-start .lang-toggle {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.8s 1.2s ease;
+}
+.lang-toggle:focus-visible {
+  outline: 2px solid var(--gold-hi);
+  outline-offset: 3px;
+}
