@@ -37,7 +37,7 @@ interface BlockProps {
 export function TextBlock({ top, width, children }: BlockProps) {
   return (
     <div className="scene-text" data-d="0" data-role="text" style={{ '--top': top, '--tw': width ?? 74 } as CSSProperties}>
-      {children}
+      <div className="scene-text-inner">{children}</div>
     </div>
   )
 }
@@ -59,7 +59,7 @@ function eventTime(ev: WeddingEvent) {
 export function CoupleText({ cfg, top }: { cfg: WeddingConfig; top: number }) {
   const [bride, groom] = coupleNames(cfg)
   return (
-    <TextBlock top={top} width={60}>
+    <TextBlock top={top} width={72}>
       <p className="reveal t-caps">{cfg.coupleLead}</p>
       {(bride || groom) && (
         <p className="t-names gilt">
@@ -135,7 +135,7 @@ export function EventText({ cfg, ev, uid, top, henna }: { cfg: WeddingConfig; ev
   const showCalendar = canAddToCalendar(ev, cfg)
   const map = safeUrl(ev.mapUrl)
   return (
-    <TextBlock top={top} width={62}>
+    <TextBlock top={top} width={76}>
       {henna && <Henna />}
       <p className="t-event-title gilt">
         <SplitText text={ev.title} />
@@ -171,7 +171,7 @@ export function ClosingText({ cfg, top }: { cfg: WeddingConfig; top: number }) {
   const rsvp = safeUrl(cfg.rsvp.url)
   const [bf, gf] = familyNames(cfg)
   return (
-    <TextBlock top={top}>
+    <TextBlock top={top} width={84}>
       <p className="reveal t-with-love">{cfg.closing.lead}</p>
       {(bf || gf) && (
         <p className="t-families gilt">

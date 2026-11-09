@@ -126,7 +126,7 @@ export const COUPLE: ScenePreset = {
   shower: 26,
   enter: 'gate',
   enterDur: 2.0,
-  textTop: 0.225,
+  textTop: 0.218,
   extras: [],
   layers: [
     // Through the gateway: the couple framed by the palace's carved arch, terraces beyond.
@@ -134,14 +134,14 @@ export const COUPLE: ScenePreset = {
     { src: 'palace_terrace', w: 120, x: 95, anchor: 'bottom', y: 4, d: -0.3, wing: true, flip: true },
     ...COLONNADE.slice(0, 2),
     ARCH,
-    { src: 'cypress_pair', w: 22, x: -41, anchor: 'bottom', y: 24, d: -0.15, ambient: 'breeze' },
-    { src: 'flowering_tree', w: 30, x: 40, anchor: 'bottom', y: 14, d: 0.05, ambient: 'breeze', delay: -3 },
-    { src: 'chhatri_large', w: 44, x: -31, anchor: 'bottom', y: 10, d: 0.05 },
-    { src: 'peacock_standing', w: 27, x: -37, anchor: 'bottom', y: 8, d: 0.3, ambient: 'breathe', role: 'peacock', glint: true },
+    { src: 'cypress_pair', w: 20, x: -42, anchor: 'bottom', y: 12, d: -0.15, ambient: 'breeze' },
+    { src: 'flowering_tree', w: 26, x: 41, anchor: 'bottom', y: 4, d: 0.05, ambient: 'breeze', delay: -3 },
+    { src: 'chhatri_large', w: 38, x: -33, anchor: 'bottom', y: 2, d: 0.05 },
+    { src: 'peacock_standing', w: 24, x: -38, anchor: 'bottom', y: -2, d: 0.3, ambient: 'breathe', role: 'peacock', glint: true },
     { src: 'wisteria_hanging', w: 42, x: -34, anchor: 'top', y: -3, d: 0.45, ambient: 'sway' },
     { src: 'vine_hanging', w: 26, x: 40, anchor: 'top', y: -2, d: 0.4, ambient: 'sway', delay: -2 },
-    { src: 'banana_leaves', w: 52, x: 32, anchor: 'bottom', y: 2, d: 0.6, ambient: 'sway-slow' },
-    { src: 'red_flower_bush', w: 124, anchor: 'bottom', y: -11, d: 0.85, ambient: 'breeze' },
+    { src: 'banana_leaves', w: 42, x: 35, anchor: 'bottom', y: -8, d: 0.6, ambient: 'sway-slow' },
+    { src: 'red_flower_bush', w: 124, anchor: 'bottom', y: -17, d: 0.85, ambient: 'breeze' },
     { src: 'emblem_buta', w: 19, anchor: 'top', y: 0, yh: 0.045, d: 0, role: 'emblem', glint: true },
   ],
 }
@@ -156,8 +156,8 @@ export const BLESSING: ScenePreset = {
   layers: [
     { src: 'palace_terrace', w: 125, x: -110, anchor: 'bottom', y: 2, d: -0.2, wing: true },
     { src: 'palace_terrace', w: 125, x: 110, anchor: 'bottom', y: 2, d: -0.2, wing: true, flip: true },
-    { src: 'palace_terrace', w: 128, anchor: 'bottom', y: -16, d: 0 },
-    { src: 'peacock_lookback', w: 22, x: 12, anchor: 'bottom', y: 9, d: 0.15, ambient: 'breathe', role: 'peacock', glint: true },
+    { src: 'palace_terrace', w: 128, anchor: 'bottom', y: -24, d: 0 },
+    { src: 'peacock_lookback', w: 22, x: 12, anchor: 'bottom', y: 2, d: 0.15, ambient: 'breathe', role: 'peacock', glint: true },
     { src: 'peacock_standing', w: 28, x: 32, anchor: 'bottom', y: -10, d: 0.35, flip: true, ambient: 'breathe', delay: -2.5, role: 'peacock', glint: true },
     { src: 'banana_leaves', w: 44, x: -36, anchor: 'bottom', y: -10, d: 0.65, ambient: 'sway-slow' },
     { src: 'red_flower_bush', w: 140, anchor: 'bottom', y: -18, d: 0.9, ambient: 'breeze' },
@@ -233,17 +233,17 @@ export const EVENT_SCENES: Record<string, ScenePreset> = {
     shower: 18,
     enter: 'procession',
     enterDur: 1.15,
-    textTop: 0.275,
+    textTop: 0.235,
     layers: [
       ...COLONNADE,
       ARCH,
       { src: 'jasmine_strings', w: 58, anchor: 'top', y: -26, d: 0.2, ambient: 'sway-slow', role: 'garland' },
-      { src: 'chhatri_large', w: 40, x: 35, anchor: 'bottom', y: 12, d: -0.05 },
-      { src: 'chhatra_umbrella', w: 21, x: -36, anchor: 'bottom', y: 20, d: 0.3, ambient: 'sway', delay: -1 },
-      { src: 'chhatra_umbrella', w: 20, x: 22, anchor: 'bottom', y: 22, d: 0.3, ambient: 'sway', delay: -2.4 },
+      { src: 'chhatri_large', w: 36, x: 36, anchor: 'bottom', y: 6, d: -0.05 },
+      { src: 'chhatra_umbrella', w: 19, x: -38, anchor: 'bottom', y: 12, d: 0.3, ambient: 'sway', delay: -1 },
+      { src: 'chhatra_umbrella', w: 18, x: 24, anchor: 'bottom', y: 14, d: 0.3, ambient: 'sway', delay: -2.4 },
       BALUSTRADE,
-      { src: 'elephant_royal', w: 72, x: -24, anchor: 'bottom', y: 6, d: 0.45, ambient: 'breathe', delay: -3, role: 'walker' },
-      { src: 'horse_white', w: 38, x: 33, anchor: 'bottom', y: 3, d: 0.5, ambient: 'breathe', delay: -1.7 },
+      { src: 'elephant_royal', w: 68, x: -26, anchor: 'bottom', y: -2, d: 0.45, ambient: 'breathe', delay: -3, role: 'walker' },
+      { src: 'horse_white', w: 34, x: 35, anchor: 'bottom', y: -3, d: 0.5, ambient: 'breathe', delay: -1.7 },
       { src: 'banana_leaves', w: 40, x: -42, anchor: 'bottom', y: -6, d: 0.85, ambient: 'sway-slow' },
     ],
   },
@@ -314,13 +314,31 @@ export const COUNTDOWN: ScenePreset = {
   ],
 }
 
+/** Our Story opens in a deep emerald garden, two peacocks keeping watch. */
+export const STORY_INTRO: ScenePreset = {
+  palette: { center: '#3c7a2a', mid: '#2a5a1b', edge: '#0f2a0a', ink: '#f6ead0', scrim: 0.2 },
+  air: air([{ kind: 'blossom', colors: JASMINE, weight: 2 }, { kind: 'leaf', colors: LEAF, weight: 2 }], true, 0.8),
+  shower: 10,
+  enter: 'curtain',
+  enterDur: 1.0,
+  textTop: 0.25,
+  layers: [
+    ...COLONNADE,
+    ARCH,
+    { src: 'rose_garland', w: 80, anchor: 'top', y: 7, d: 0.25, ambient: 'sway-slow', role: 'garland' },
+    BALUSTRADE,
+    { src: 'peacock_standing', w: 20, x: -36, anchor: 'bottom', y: -2, d: 0.45, ambient: 'breathe', role: 'peacock', glint: true },
+    { src: 'peacock_standing', w: 20, x: 36, anchor: 'bottom', y: -2, d: 0.45, flip: true, ambient: 'breathe', delay: -2.4, role: 'peacock', glint: true },
+  ],
+}
+
 /** Our Story, part one: the emerald-olive garden with its peacock. */
 export const STORY_ONE: ScenePreset = {
   palette: { center: '#7d6d1d', mid: '#64520f', edge: '#2f2604', ink: '#f6e8c0', scrim: 0.22 },
   air: air([{ kind: 'blossom', colors: PINK, weight: 2 }, { kind: 'leaf', colors: LEAF, weight: 2 }]),
-  enter: 'curtain',
+  enter: 'truck',
   enterDur: 1.0,
-  textTop: 0.195,
+  textTop: 0.26,
   layers: [
     ...COLONNADE,
     ARCH,
@@ -400,7 +418,7 @@ export const CLOSING: ScenePreset = {
   shower: 30,
   enter: 'lift',
   enterDur: 1.1,
-  textTop: 0.405,
+  textTop: 0.33,
   extras: ['border', 'medallion'],
   layers: [
     { src: 'palace_terrace', w: 125, x: -108, anchor: 'bottom', y: 2, d: -0.3, wing: true },

@@ -193,6 +193,7 @@ export function StoryText({ cfg, chapters, intro, top }: { cfg: WeddingConfig; c
           <p className="t-event-title t-story-title gilt">
             <SplitText text={cfg.story.title} />
           </p>
+          <Rule />
           {cfg.story.intro.trim() && <p className="reveal t-story-intro">{cfg.story.intro}</p>}
           <Rule />
         </>
@@ -232,7 +233,7 @@ export function LittleHeartsText({ cfg, top }: { cfg: WeddingConfig; top: number
 export function FamilyWelcomeText({ cfg, top }: { cfg: WeddingConfig; top: number }) {
   const { heartyTitle, hearty, specialTitle, special } = cfg.welcome
   return (
-    <TextBlock top={top} width={80}>
+    <TextBlock top={top} width={88}>
       {hearty.length > 0 && (
         <>
           <p className="t-welcome-title gilt">

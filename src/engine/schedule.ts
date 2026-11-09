@@ -1,4 +1,4 @@
-import { BLESSING, CLOSING, COUNTDOWN, COUPLE, FAMILY_WELCOME, HOLD, LITTLE_HEARTS, OPENING, presetFor, STORY_ONE, STORY_TWO } from '../config/scenes'
+import { BLESSING, CLOSING, COUNTDOWN, COUPLE, FAMILY_WELCOME, HOLD, LITTLE_HEARTS, OPENING, presetFor, STORY_INTRO, STORY_ONE, STORY_TWO } from '../config/scenes'
 import type { ScenePreset, TransitionType } from '../config/scenes'
 import type { StoryChapter, WeddingConfig, WeddingEvent } from '../config/wedding'
 
@@ -27,15 +27,22 @@ const TAIL = 0.35
 
 export function buildScenes(cfg: WeddingConfig): { scenes: SceneModel[]; total: number } {
   type Raw = Pick<SceneModel, 'id' | 'kind' | 'preset' | 'event' | 'eventIndex' | 'chapters' | 'intro'> & { hold: number }
-  // Long stories are told across two scenes so every chapter has room to breathe.
+  // The story opens with its title and introduction on their own slide, then the chapters
+  // follow two to a slide so the words can stay large.
   const { chapters } = cfg.story
-  const split = chapters.length > 2 ? Math.ceil(chapters.length / 2) : chapters.length
-  const story: Raw[] = chapters.length
+  const pairs: StoryChapter[][] = []
+  for (let i = 0; i < chapters.length; i += 2) pairs.push(chapters.slice(i, i + 2))
+  const chapterLooks = [STORY_ONE, STORY_TWO]
+  const story: Raw[] = chapters.length || cfg.story.intro.trim()
     ? [
-        { id: 'story-1', kind: 'story', preset: STORY_ONE, hold: HOLD.story, chapters: chapters.slice(0, split), intro: true },
-        ...(chapters.length > split
-          ? [{ id: 'story-2', kind: 'story' as const, preset: STORY_TWO, hold: HOLD.story, chapters: chapters.slice(split) }]
-          : []),
+        { id: 'story-intro', kind: 'story', preset: STORY_INTRO, hold: HOLD.story, chapters: [], intro: true },
+        ...pairs.map((pair, i) => ({
+          id: `story-${i + 1}`,
+          kind: 'story' as const,
+          preset: chapterLooks[i % chapterLooks.length],
+          hold: HOLD.story,
+          chapters: pair,
+        })),
       ]
     : []
   const little = cfg.littleHearts

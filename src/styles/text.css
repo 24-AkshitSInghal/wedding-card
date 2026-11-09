@@ -26,49 +26,62 @@
 .gilt .ch {
   text-shadow: none;
 }
-.scene-text > * {
+.scene-text-inner > *,
+.scene-text-inner > .chapter > * {
   margin: 0;
+}
+/* Shorter screens (9:16 phones, desktop) have less height for the same width, so the
+   words are set a little smaller there; tall phones keep the full size. */
+.scene-text-inner {
+  zoom: var(--tz, 1);
+}
+@media (min-aspect-ratio: 10/19) {
+  .scene-text-inner {
+    --tz: 0.86;
+  }
 }
 
 .t-caps {
   font-family: var(--caps);
   font-weight: 500;
-  font-size: clamp(10.5px, calc(var(--u) * 2.75), 15px);
-  letter-spacing: 0.2em;
+  font-size: clamp(12px, calc(var(--u) * 3.3), 17px);
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  line-height: 1.6;
+  line-height: 1.55;
+  text-wrap: balance;
+  max-width: calc(var(--u) * 62);
+  margin-left: auto !important;
+  margin-right: auto !important;
 }
 .t-invocation {
   font-family: var(--caps);
-  font-size: clamp(10.5px, calc(var(--u) * 2.6), 14px);
-  letter-spacing: 0.18em;
-  margin-bottom: 0.9em !important;
+  font-size: clamp(12px, calc(var(--u) * 3.2), 16px);
+  letter-spacing: 0.14em;
+  margin-bottom: 0.8em !important;
 }
 .t-message {
-  font-family: var(--caps);
-  font-weight: 400;
-  font-size: clamp(10.5px, calc(var(--u) * 2.75), 15px);
-  letter-spacing: 0.085em;
-  line-height: 1.75;
-  text-transform: uppercase;
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: clamp(17px, calc(var(--u) * 4.6), 25px);
+  line-height: 1.42;
   text-wrap: balance;
 }
 
 .t-names {
-  font-family: var(--script);
-  font-weight: 400;
-  font-size: clamp(34px, calc(var(--u) * 11), 66px);
-  line-height: 1;
-  margin: 0.22em 0 0.2em !important;
-  letter-spacing: 0.01em;
+  font-family: var(--display);
+  font-style: italic;
+  font-weight: 500;
+  font-size: clamp(40px, calc(var(--u) * 12.5), 72px);
+  line-height: 1.08;
+  margin: 0.25em 0 0.22em !important;
 }
 .t-names .nm {
   display: block;
 }
 .t-names .amp {
   display: block;
-  margin: 0.02em 0 0.06em;
-  font-size: 0.7em;
+  margin: 0.04em 0 0.08em;
+  font-size: 0.62em;
   line-height: 1;
 }
 .t-families .fam {
@@ -92,101 +105,105 @@
 }
 
 .t-fullname {
-  font-family: var(--caps);
+  font-family: var(--display);
   font-weight: 600;
-  font-size: clamp(19px, calc(var(--u) * 6.4), 36px);
-  letter-spacing: 0.06em;
-  line-height: 1.15;
-  margin-top: 0.55em !important;
+  font-size: clamp(30px, calc(var(--u) * 9), 50px);
+  line-height: 1.12;
+  margin-top: 0.5em !important;
 }
 .t-parents {
-  font-family: var(--caps);
-  font-size: clamp(10px, calc(var(--u) * 2.4), 13px);
-  letter-spacing: 0.12em;
-  line-height: 1.6;
-  text-transform: uppercase;
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 500;
+  font-size: clamp(15.5px, calc(var(--u) * 4.2), 22px);
+  line-height: 1.35;
+  margin-top: 0.15em !important;
+  text-wrap: balance;
 }
 .t-and {
-  font-family: var(--script);
-  font-size: clamp(26px, calc(var(--u) * 8.5), 46px);
+  font-family: var(--display);
+  font-style: italic;
+  font-size: clamp(26px, calc(var(--u) * 7.5), 42px);
   line-height: 1;
-  margin: 0.15em 0 -0.1em !important;
+  margin: 0.25em 0 -0.05em !important;
 }
 
 .t-invite {
   font-family: var(--serif);
   font-style: italic;
-  font-size: clamp(15px, calc(var(--u) * 4.4), 24px);
-  line-height: 1.35;
-  opacity: 0.95;
+  font-weight: 500;
+  font-size: clamp(18px, calc(var(--u) * 5), 27px);
+  line-height: 1.3;
   text-wrap: balance;
 }
 
 .t-date {
   font-family: var(--caps);
-  font-weight: 500;
-  font-size: clamp(11.5px, calc(var(--u) * 3.6), 20px);
-  letter-spacing: 0.08em;
-  line-height: 1.5;
-  margin-top: 0.5em !important;
+  font-weight: 600;
+  font-size: clamp(15px, calc(var(--u) * 4.4), 24px);
+  letter-spacing: 0.05em;
+  line-height: 1.4;
+  margin-top: 0.6em !important;
+  text-wrap: balance;
 }
 .t-location {
   font-family: var(--caps);
-  font-size: clamp(10.5px, calc(var(--u) * 3), 16px);
-  letter-spacing: 0.16em;
+  font-weight: 500;
+  font-size: clamp(12.5px, calc(var(--u) * 3.4), 18px);
+  letter-spacing: 0.1em;
+  line-height: 1.45;
   text-transform: uppercase;
+  margin-top: 0.3em !important;
 }
 
 /* Event cards */
 .t-event-title {
-  font-family: var(--serif);
+  font-family: var(--display);
   font-weight: 500;
-  font-size: clamp(32px, calc(var(--u) * 10.4), 60px);
-  line-height: 1.02;
-  letter-spacing: 0.01em;
+  font-size: clamp(34px, calc(var(--u) * 9.8), 58px);
+  line-height: 1.08;
   text-wrap: balance;
-  margin-bottom: 0.32em !important;
-}
-.t-event-title .initial {
-  font-family: var(--script);
-  font-weight: 400;
-  font-size: 1.28em;
-  line-height: 0.8;
+  margin-bottom: 0.18em !important;
 }
 .t-event-date {
   font-family: var(--caps);
   font-weight: 600;
-  font-size: clamp(13px, calc(var(--u) * 4.1), 22px);
-  letter-spacing: 0.07em;
-  margin-top: 0.2em !important;
+  font-size: clamp(16px, calc(var(--u) * 4.7), 26px);
+  letter-spacing: 0.04em;
+  margin-top: 0.45em !important;
 }
 .t-event-time {
   font-family: var(--caps);
-  font-size: clamp(11px, calc(var(--u) * 2.9), 15px);
-  letter-spacing: 0.14em;
+  font-weight: 500;
+  font-size: clamp(13.5px, calc(var(--u) * 3.8), 20px);
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  margin-top: 0.55em !important;
+  margin-top: 0.3em !important;
 }
 .t-venue-label {
   font-family: var(--caps);
-  font-size: clamp(9.5px, calc(var(--u) * 2.2), 12px);
-  letter-spacing: 0.32em;
+  font-size: clamp(11px, calc(var(--u) * 2.9), 15px);
+  letter-spacing: 0.26em;
   text-transform: uppercase;
-  margin-top: 1.4em !important;
+  opacity: 0.85;
+  margin-top: 1.1em !important;
 }
 .t-venue {
   font-family: var(--caps);
-  font-weight: 500;
-  font-size: clamp(11.5px, calc(var(--u) * 3.5), 19px);
-  letter-spacing: 0.1em;
-  line-height: 1.4;
+  font-weight: 600;
+  font-size: clamp(15px, calc(var(--u) * 4.3), 24px);
+  letter-spacing: 0.05em;
+  line-height: 1.3;
   text-transform: uppercase;
   margin-top: 0.15em !important;
 }
 .t-address {
   font-family: var(--serif);
-  font-style: italic;
-  font-size: clamp(13px, calc(var(--u) * 3.6), 19px);
+  font-weight: 500;
+  font-size: clamp(15.5px, calc(var(--u) * 4.1), 22px);
+  line-height: 1.3;
+  margin-top: 0.15em !important;
+  text-wrap: balance;
 }
 
 .is-placeholder {
@@ -197,7 +214,8 @@
 .t-actions {
   display: flex;
   justify-content: center;
-  gap: 1.4em;
+  gap: 1.1em;
+  white-space: nowrap;
   margin-top: 1.1em !important;
   pointer-events: auto;
 }
@@ -206,8 +224,8 @@
   align-items: center;
   gap: 0.45em;
   font-family: var(--serif);
-  font-style: italic;
-  font-size: clamp(14px, calc(var(--u) * 3.7), 19px);
+  font-weight: 600;
+  font-size: clamp(16px, calc(var(--u) * 4.3), 22px);
   color: inherit;
   text-decoration: none;
   padding: 0.35em 0.2em;
@@ -247,27 +265,30 @@
 .t-with-love {
   font-family: var(--caps);
   font-weight: 500;
-  font-size: clamp(11px, calc(var(--u) * 3.3), 18px);
-  letter-spacing: 0.3em;
+  font-size: clamp(14px, calc(var(--u) * 3.9), 21px);
+  letter-spacing: 0.24em;
   text-transform: uppercase;
 }
 .t-families {
-  font-family: var(--script);
-  font-size: clamp(32px, calc(var(--u) * 10), 58px);
+  font-family: var(--display);
+  font-style: italic;
+  font-weight: 500;
+  font-size: clamp(32px, calc(var(--u) * 9.4), 54px);
   line-height: 1.15;
-  margin: 0.2em 0 0.3em !important;
+  margin: 0.2em 0 0.15em !important;
 }
 .t-closing-msg {
   font-family: var(--serif);
   font-style: italic;
-  font-size: clamp(15px, calc(var(--u) * 4.3), 23px);
-  line-height: 1.4;
+  font-weight: 500;
+  font-size: clamp(18px, calc(var(--u) * 5), 27px);
+  line-height: 1.32;
   text-wrap: balance;
 }
 .t-blessing {
   font-family: var(--caps);
-  font-size: clamp(10px, calc(var(--u) * 2.5), 13px);
-  letter-spacing: 0.18em;
+  font-size: clamp(12px, calc(var(--u) * 3.2), 16px);
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   margin-top: 1em !important;
 }
@@ -299,9 +320,9 @@
 
 .ornament-rule {
   display: block;
-  width: calc(var(--u) * 34);
+  width: calc(var(--u) * 38);
   height: auto;
-  margin: 0.9em auto 0.6em;
+  margin: 0.7em auto 0.5em;
   color: var(--gold);
   opacity: 0.85;
 }
@@ -363,21 +384,21 @@
 .t-invocation-meaning {
   font-family: var(--serif);
   font-style: italic;
-  font-size: clamp(13px, calc(var(--u) * 3.4), 18px);
-  margin-bottom: 0.9em !important;
+  font-size: clamp(16px, calc(var(--u) * 4.2), 22px);
+  margin-bottom: 0.8em !important;
 }
 .t-hashtag {
-  font-family: var(--serif);
+  font-family: var(--display);
   font-style: italic;
-  font-size: clamp(14px, calc(var(--u) * 3.8), 20px);
-  margin-top: 0.4em !important;
+  font-size: clamp(17px, calc(var(--u) * 4.6), 25px);
+  margin-top: 0.45em !important;
 }
 .t-event-note {
   font-family: var(--serif);
   font-style: italic;
-  font-size: clamp(14px, calc(var(--u) * 3.9), 21px);
-  line-height: 1.3;
-  margin-bottom: 0.2em !important;
+  font-weight: 500;
+  font-size: clamp(18px, calc(var(--u) * 4.9), 26px);
+  line-height: 1.25;
   text-wrap: balance;
 }
 .t-contacts {
@@ -386,68 +407,78 @@
 }
 .t-contacts-label {
   font-family: var(--caps);
-  font-size: clamp(9.5px, calc(var(--u) * 2.2), 12px);
-  letter-spacing: 0.32em;
-  margin-bottom: 0.3em !important;
+  font-size: clamp(12px, calc(var(--u) * 3.2), 16px);
+  letter-spacing: 0.26em;
+  margin-bottom: 0.35em !important;
 }
 .t-contact {
   display: block;
   color: inherit;
   text-decoration: none;
   font-family: var(--serif);
-  font-size: clamp(12.5px, calc(var(--u) * 3.2), 17px);
-  line-height: 1.45;
+  font-weight: 500;
+  font-size: clamp(14.5px, calc(var(--u) * 3.8), 20px);
+  line-height: 1.2;
+}
+.t-contact + .t-contact {
+  margin-top: 0.4em;
 }
 .t-contact .t-phone {
+  display: block;
   font-family: var(--caps);
-  font-size: 0.85em;
-  letter-spacing: 0.06em;
-  margin-left: 0.5em;
-  border-bottom: 1px solid rgb(231 194 124 / 0.5);
+  font-weight: 600;
+  font-size: 0.95em;
+  letter-spacing: 0.08em;
+  width: fit-content;
+  margin: 0.05em auto 0;
+  border-bottom: 1px solid rgb(231 194 124 / 0.55);
 }
 
 /* ── Countdown & scratch card ────────────────────────────────────────────── */
 
 .t-countdown-title {
-  font-family: var(--script);
-  font-size: clamp(24px, calc(var(--u) * 6.9), 40px);
-  line-height: 1.1;
-  margin-bottom: 0.35em !important;
+  font-family: var(--display);
+  font-style: italic;
+  font-weight: 500;
+  font-size: clamp(28px, calc(var(--u) * 8), 46px);
+  line-height: 1.12;
+  text-wrap: balance;
+  margin-bottom: 0.45em !important;
 }
 .countdown {
   display: flex;
   justify-content: center;
-  gap: calc(var(--u) * 2.2);
+  gap: calc(var(--u) * 2.4);
 }
 .cd-unit {
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-width: calc(var(--u) * 14);
-  padding: 0.55em 0.3em 0.45em;
-  border: 1px solid rgb(231 194 124 / 0.55);
-  border-radius: calc(var(--u) * 1.6);
-  background: rgb(40 10 6 / 0.28);
+  min-width: calc(var(--u) * 16.5);
+  padding: 0.5em 0.3em 0.45em;
+  border: 1px solid rgb(231 194 124 / 0.6);
+  border-radius: calc(var(--u) * 1.8);
+  background: rgb(40 10 6 / 0.32);
 }
 .cd-num {
-  font-family: var(--caps);
+  font-family: var(--display);
   font-weight: 600;
-  font-size: clamp(20px, calc(var(--u) * 6.8), 38px);
-  line-height: 1;
-  font-variant-numeric: tabular-nums;
+  font-size: clamp(26px, calc(var(--u) * 8.2), 46px);
+  line-height: 1.05;
+  font-variant-numeric: lining-nums tabular-nums;
   color: var(--gold-hi);
 }
 .cd-label {
   font-family: var(--caps);
-  font-size: clamp(8px, calc(var(--u) * 2), 11px);
-  letter-spacing: 0.16em;
+  font-size: clamp(9.5px, calc(var(--u) * 2.5), 13px);
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  margin-top: 0.5em;
+  margin-top: 0.45em;
 }
 .scratch {
   position: relative;
-  width: calc(var(--u) * 64);
-  height: calc(var(--u) * 19);
+  width: calc(var(--u) * 72);
+  height: calc(var(--u) * 22);
   margin: 1.2em auto 0 !important;
   border-radius: calc(var(--u) * 2);
   overflow: hidden;
@@ -466,14 +497,16 @@
 }
 .scratch-kicker {
   font-family: var(--caps);
-  font-size: clamp(9px, calc(var(--u) * 2.3), 12px);
-  letter-spacing: 0.3em;
+  font-size: clamp(11px, calc(var(--u) * 3), 15px);
+  letter-spacing: 0.24em;
   text-transform: uppercase;
 }
 .scratch-date {
   font-family: var(--caps);
   font-weight: 600;
-  font-size: clamp(13px, calc(var(--u) * 3.9), 21px);
+  font-size: clamp(15px, calc(var(--u) * 4.4), 24px);
+  text-align: center;
+  line-height: 1.3;
   letter-spacing: 0.05em;
   color: var(--gold-hi);
 }
@@ -496,34 +529,42 @@
 .t-story-intro {
   font-family: var(--serif);
   font-style: italic;
-  font-size: clamp(14px, calc(var(--u) * 3.8), 21px);
-  line-height: 1.32;
+  font-weight: 500;
+  font-size: clamp(17px, calc(var(--u) * 4.6), 25px);
+  line-height: 1.38;
   text-wrap: balance;
 }
 .chapter + .chapter {
-  margin-top: 0.7em;
+  margin-top: 0.9em;
 }
 .t-chapter-title {
-  font-family: var(--script);
-  font-size: clamp(24px, calc(var(--u) * 6.8), 40px);
-  line-height: 1;
+  font-family: var(--display);
+  font-style: italic;
+  font-weight: 500;
+  font-size: clamp(27px, calc(var(--u) * 7.6), 44px);
+  line-height: 1.12;
+  margin-bottom: 0.1em !important;
 }
 .t-chapter-text {
   font-family: var(--serif);
-  font-size: clamp(14px, calc(var(--u) * 3.85), 21px);
-  line-height: 1.3;
+  font-weight: 500;
+  font-size: clamp(17px, calc(var(--u) * 4.6), 25px);
+  line-height: 1.36;
   text-wrap: balance;
 }
 .t-little-names {
-  font-family: var(--script);
-  font-size: clamp(26px, calc(var(--u) * 7.4), 44px);
+  font-family: var(--display);
+  font-style: italic;
+  font-weight: 500;
+  font-size: clamp(32px, calc(var(--u) * 9.4), 54px);
   line-height: 1.15;
-  margin: 0.2em 0 0.25em !important;
+  margin: 0.15em 0 0.3em !important;
 }
 .t-little-msg {
   font-family: var(--serif);
   font-style: italic;
-  font-size: clamp(14px, calc(var(--u) * 3.85), 21px);
+  font-weight: 500;
+  font-size: clamp(17px, calc(var(--u) * 4.6), 25px);
   line-height: 1.36;
   text-wrap: balance;
 }
@@ -531,23 +572,29 @@
   margin-top: 0.55em !important;
 }
 .t-welcome-title {
-  font-family: var(--script);
-  font-size: clamp(24px, calc(var(--u) * 6.6), 40px);
+  font-family: var(--display);
+  font-style: italic;
+  font-weight: 500;
+  font-size: clamp(26px, calc(var(--u) * 7), 40px);
   line-height: 1.15;
-  margin-bottom: 0.2em !important;
+  margin-bottom: 0.25em !important;
 }
 .name-list {
   list-style: none;
   padding: 0;
   font-family: var(--serif);
-  font-weight: 500;
-  font-size: clamp(15px, calc(var(--u) * 4.2), 23px);
-  line-height: 1.5;
+  font-weight: 600;
+  font-size: clamp(18px, calc(var(--u) * 5), 27px);
+  line-height: 1.42;
 }
 .name-list.two-col {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  column-gap: 1.2em;
+  grid-template-columns: auto auto;
+  justify-content: center;
+  column-gap: 1.1em;
+}
+.name-list li {
+  white-space: nowrap;
 }
 .name-list.two-col li:nth-child(odd) {
   text-align: right;
@@ -557,12 +604,12 @@
 }
 
 .t-story-title {
-  font-size: clamp(28px, calc(var(--u) * 8.6), 50px);
-  margin-bottom: 0.15em !important;
+  font-size: clamp(38px, calc(var(--u) * 11.5), 66px);
+  margin-bottom: 0.2em !important;
 }
 
 .t-mantra {
-  margin-bottom: 0.35em !important;
+  margin-bottom: 0.4em !important;
 }
 
 /* ── हिन्दी ─────────────────────────────────────────────────────────────────
@@ -571,6 +618,7 @@
 .lang-hi {
   --caps: 'Tiro Devanagari Hindi', var(--serif);
   --script: 'Rozha One', 'Tiro Devanagari Hindi', serif;
+  --display: 'Rozha One', 'Tiro Devanagari Hindi', serif;
 }
 .lang-hi .scene-text,
 .lang-hi .scene-text * {
@@ -582,25 +630,39 @@
   font-family: 'Tiro Devanagari Hindi', var(--serif);
   line-height: 1.5;
 }
-.lang-hi .t-names { font-size: clamp(30px, calc(var(--u) * 9.5), 56px); line-height: 1.25; }
-.lang-hi .t-event-title { font-family: 'Rozha One', serif; font-size: clamp(30px, calc(var(--u) * 9), 52px); line-height: 1.25; }
-.lang-hi .t-fullname { font-family: 'Rozha One', serif; font-size: clamp(24px, calc(var(--u) * 7), 40px); }
+.lang-hi .t-names { font-family: 'Rozha One', serif; font-size: clamp(38px, calc(var(--u) * 11.5), 66px); line-height: 1.3; }
+.lang-hi .t-event-title,
+.lang-hi .t-story-title { font-family: 'Rozha One', serif; font-size: clamp(34px, calc(var(--u) * 10), 58px); line-height: 1.3; }
+.lang-hi .t-fullname { font-family: 'Rozha One', serif; font-size: clamp(30px, calc(var(--u) * 8.6), 48px); }
 .lang-hi .t-families,
-.lang-hi .t-little-names { font-size: clamp(26px, calc(var(--u) * 7.6), 44px); line-height: 1.3; }
+.lang-hi .t-little-names,
+.lang-hi .t-and { font-family: 'Rozha One', serif; font-size: clamp(30px, calc(var(--u) * 8.6), 50px); line-height: 1.32; }
 .lang-hi .t-chapter-title,
 .lang-hi .t-welcome-title,
-.lang-hi .t-countdown-title { font-size: clamp(22px, calc(var(--u) * 6.2), 36px); line-height: 1.3; }
-.lang-hi .t-message { font-size: clamp(13px, calc(var(--u) * 3.6), 19px); line-height: 1.6; }
-.lang-hi .t-caps,
-.lang-hi .t-with-love { font-size: clamp(14px, calc(var(--u) * 3.8), 20px); }
+.lang-hi .t-countdown-title,
+.lang-hi .t-hashtag { font-family: 'Rozha One', serif; font-size: clamp(26px, calc(var(--u) * 7.4), 42px); line-height: 1.3; }
+.lang-hi .t-hashtag { font-family: 'Tiro Devanagari Hindi', serif; font-size: clamp(17px, calc(var(--u) * 4.6), 25px); }
+.lang-hi .t-message,
+.lang-hi .t-story-intro,
+.lang-hi .t-chapter-text,
+.lang-hi .t-little-msg,
+.lang-hi .t-invite,
+.lang-hi .t-closing-msg,
+.lang-hi .t-event-note { font-size: clamp(17px, calc(var(--u) * 4.6), 25px); line-height: 1.55; }
 .lang-hi .t-parents,
+.lang-hi .t-address,
+.lang-hi .t-contact,
+.lang-hi .name-list { font-size: clamp(16px, calc(var(--u) * 4.4), 24px); line-height: 1.5; }
+.lang-hi .t-caps,
+.lang-hi .t-with-love,
+.lang-hi .t-location,
+.lang-hi .t-venue,
+.lang-hi .t-event-time,
+.lang-hi .t-date { font-size: clamp(16px, calc(var(--u) * 4.4), 24px); }
 .lang-hi .t-venue-label,
 .lang-hi .cd-label,
 .lang-hi .scratch-kicker,
-.lang-hi .t-contacts-label { font-size: clamp(12px, calc(var(--u) * 3.1), 16px); }
-.lang-hi .t-story-intro,
-.lang-hi .t-chapter-text,
-.lang-hi .t-little-msg { font-size: clamp(13.5px, calc(var(--u) * 3.6), 20px); line-height: 1.55; }
+.lang-hi .t-contacts-label { font-size: clamp(14px, calc(var(--u) * 3.7), 19px); }
 .lang-hi .scroll-hint,
 .lang-hi .scroll-hint * {
   font-family: 'Tiro Devanagari Hindi', serif;
@@ -626,4 +688,9 @@
   width: 100%;
   height: auto;
   filter: drop-shadow(0 3px 6px rgb(30 6 4 / 0.5));
+}
+
+/* The closing carries the most lines, so it uses less of a tall phone's extra height. */
+.scene--closing .scene-text {
+  top: calc(var(--fh) * var(--top) + var(--tall) * 0.18);
 }

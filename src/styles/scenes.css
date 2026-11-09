@@ -301,12 +301,12 @@
 .medallion {
   position: absolute;
   left: 50%;
-  top: calc(var(--fh) * 0.235 + var(--tall) * 0.3);
-  width: calc(var(--u) * 36);
+  top: calc(var(--fh) * 0.205 + var(--tall) * 0.12);
+  width: calc(var(--u) * 33);
   aspect-ratio: 1;
   /* Centred with margins: GSAP owns this element's transform (it resets CSS translate). */
-  margin-left: calc(var(--u) * -18);
-  margin-top: calc(var(--u) * -18);
+  margin-left: calc(var(--u) * -16.5);
+  margin-top: calc(var(--u) * -16.5);
   z-index: calc(var(--zs) + 34);
   filter: drop-shadow(0 10px 22px rgb(0 0 0 / 0.45));
 }
