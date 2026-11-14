@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import App from './App'
 import { SoundToggle } from './components/SoundToggle'
-import { wedding } from './config/wedding'
+import { wedding } from './config/card'
 import { initialLang, rememberLang, setLang } from './lib/i18n'
 import type { Lang } from './lib/i18n'
 

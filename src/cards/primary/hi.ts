@@ -1,9 +1,9 @@
-import type { WeddingOverrides } from '../lib/i18n'
+import type { WeddingOverrides } from '../../lib/i18n'
 
 /**
  * हिन्दी — the Hindi version of the invitation.
  *
- * Only the words live here; dates, times, phone numbers and links come from wedding.ts.
+ * Only the words live here; dates, times, phone numbers and links come from en.ts.
  * Anything left out falls back to the English text. Events are matched by their `id`.
  */
 export const weddingHi: WeddingOverrides = {

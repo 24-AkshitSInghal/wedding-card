@@ -9,8 +9,9 @@ There is no header, menu or footer: just the invitation.
 
 ## Make it yours
 
-Everything personal lives in **`src/config/wedding.ts`**: names, families, parents,
-the invitation wording, and the list of events.
+Everything personal lives in a **card** folder, **`src/cards/<card>/`**: `en.ts` holds the
+names, families, parents, invitation wording and events, and `hi.ts` their Hindi
+translation. The build shows the card named by the `CARD` setting (default `primary`).
 
 - Leave anything you don't know yet as `""`. While `showPlaceholders` is `true`, a dimmed
   `[Venue]`-style placeholder shows what is missing. Set it to `false` before sharing and
@@ -24,11 +25,12 @@ the invitation wording, and the list of events.
 - **Add to calendar** appears only when an event has a date, a time and a venue.
 - **RSVP** appears in the closing only when `rsvp.url` is set (a form link, a `wa.me/…`
   WhatsApp link or a `mailto:` link).
-- **Music** appears only when `audio.src` points at a file you have the rights to use
-  (put it in `public/audio/`). It starts muted and never autoplays.
+- **Music** plays when `audio.src` points at a file you have the rights to use (put it in
+  `public/audio/`). Browsers allow sound only after a tap, so the opening asks the guest
+  to "Tap to open"; the button in the corner mutes it.
 - **Link preview.** The page title and the WhatsApp preview text are filled in from the
-  names when you build. Set `siteUrl` to the address you host the invitation at, so
-  WhatsApp can show the preview picture (`public/og-image.jpg`).
+  names when you build. On Vercel the preview picture (`public/og-image.jpg`) gets the
+  site's address automatically; on another host, or with your own domain, set `siteUrl`.
 
 The look of each scene (palette, illustrated layers, depth, how it enters) lives in
 `src/config/scenes.ts`.
@@ -48,7 +50,32 @@ npm run build
 ```
 
 `dist/` is a static site: upload it to any static host (Netlify, Vercel, Cloudflare Pages,
-GitHub Pages) and share the link on WhatsApp.
+GitHub Pages) and share the link on WhatsApp. To build another card, set `CARD`:
+
+```bash
+CARD=second npm run build
+```
+
+## Two cards, two sites
+
+The same invitation can go out with different words, for example one card from each
+family. Each card is a folder in `src/cards/` (`primary` and `second` to start with;
+`second` begins as a copy of `primary`, so edit its `en.ts` and `hi.ts`). To add another,
+copy a folder and add one line for it in `src/cards/index.ts`.
+
+## Deploy on Vercel
+
+`vercel.json` already sets the build. For each card, make one Vercel project from this
+same GitHub repository:
+
+1. On vercel.com choose **Add New… → Project** and import the repository.
+2. Leave the framework (Vite), build command and output folder as they are.
+3. Under **Environment Variables** add `CARD` with the card's folder name
+   (`primary` for the first site, `second` for the second).
+4. Click **Deploy**. Every push to `main` then redeploys both sites.
+
+Give each project its own name (it becomes the address, e.g. `vani-sparsh.vercel.app`),
+or add your own domain under the project's **Settings → Domains**.
 
 To preview the reduced-motion version without changing system settings, open the page
 with `?reduce-motion` on the end of the address.

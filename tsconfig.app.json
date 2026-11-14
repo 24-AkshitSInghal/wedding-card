@@ -15,6 +15,8 @@
     "moduleDetection": "force",
     "noEmit": true,
     "jsx": "react-jsx",
+    /* The card a build shows is chosen in vite.config.ts; type-checking uses "primary". */
+    "paths": { "@card": ["./src/cards/primary/index.ts"] },
 
     /* Linting */
     "noUnusedLocals": true,

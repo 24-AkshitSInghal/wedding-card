@@ -1,4 +1,4 @@
-import { wedding } from '../config/wedding'
+import { wedding } from '../config/card'
 
 /**
  * The invitation's background song, shared by the opening screen (which starts it) and the
