@@ -28,7 +28,7 @@ export interface WeddingOverrides {
 const UI = {
   en: {
     venue: 'Venue',
-    f    venues: 'Venues',
+    venues: 'Venues',
     viewVenue: 'View venue',
     addToCalendar: 'Add to calendar',
     scrollToEnter: 'Scroll to enter',
