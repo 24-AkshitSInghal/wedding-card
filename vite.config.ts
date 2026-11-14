@@ -11,7 +11,7 @@ function invitationMeta(): Plugin {
     name: 'invitation-meta',
     transformIndexHtml(html) {
       const names = [wedding.bride.name, wedding.groom.name].map((n) => n.trim()).filter(Boolean).join(' & ')
-      const title = names ? `${names} — Wedding Invitation` : 'The Royal Wedding — An Invitation'
+      const title = names ? `${names} - Wedding Invitation` : 'The Royal Wedding - An Invitation'
       const description = names
         ? `${wedding.coupleLead} ${wedding.coupleInvite}.`
         : 'You are warmly invited to a royal wedding celebration.'
@@ -27,4 +27,11 @@ function invitationMeta(): Plugin {
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), invitationMeta()],
+  server: {
+    host: true, // Exposes the server to the local network (0.0.0.0)
+  },
+  // Lets a temporary Cloudflare tunnel (https://*.trycloudflare.com) serve the built site.
+  preview: {
+    allowedHosts: ['.trycloudflare.com'],
+  },
 })

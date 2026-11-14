@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 import App from './App'
+import { SoundToggle } from './components/SoundToggle'
+import { wedding } from './config/wedding'
 import { initialLang, rememberLang, setLang } from './lib/i18n'
 import type { Lang } from './lib/i18n'
 
@@ -16,5 +18,11 @@ export default function Root() {
     rememberLang(next)
     setLangState(next)
   }
-  return <App key={lang} lang={lang} onToggleLang={toggle} />
+  return (
+    <>
+      <App key={lang} lang={lang} onToggleLang={toggle} />
+      {/* Outside the invitation so the song keeps playing when the language changes. */}
+      {wedding.audio.src.trim() && <SoundToggle title={wedding.audio.title} />}
+    </>
+  )
 }

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import type { StoryChapter, WeddingConfig } from '../config/wedding'
 import { canSaveTheDate, langFor, saveTheDate, timeUntil, weddingDateLine, weddingStart } from '../lib/format'
+import { celebrate } from '../lib/celebrate'
 import { t } from '../lib/i18n'
 import { CalendarIcon, Rule } from './Ornaments'
 import { TextBlock } from './SceneTexts'
@@ -37,6 +38,9 @@ function Countdown({ target }: { target: Date }) {
   )
 }
 
+/** Share of the foil to scratch away before the card reveals itself completely. */
+const REVEAL_AT = 0.3
+
 /** Gold foil the guest scratches away with a finger (or mouse) to reveal what is beneath. */
 function ScratchCard({ label, children }: { label: string; children: ReactNode }) {
   const wrapRef = useRef<HTMLDivElement>(null)
@@ -48,7 +52,11 @@ function ScratchCard({ label, children }: { label: string; children: ReactNode }
     const canvas = canvasRef.current!
     const ctx = canvas.getContext('2d')!
     let scratched = false
+    let done = false
+    let strokes = 0
     let last: { x: number; y: number } | null = null
+    let active = false
+    let pointerId = -1
 
     const paint = () => {
       if (scratched) return
@@ -93,14 +101,21 @@ function ScratchCard({ label, children }: { label: string; children: ReactNode }
     const ro = new ResizeObserver(paint)
     ro.observe(wrap)
 
-    const point = (e: PointerEvent) => {
+    // Maps a screen position onto the foil's own drawing size (robust to CSS zoom).
+    const point = (clientX: number, clientY: number) => {
       const r = canvas.getBoundingClientRect()
-      return { x: e.clientX - r.left, y: e.clientY - r.top }
+      const w = canvas.width / dpr()
+      const h = canvas.height / dpr()
+      return { x: ((clientX - r.left) / r.width) * w, y: ((clientY - r.top) / r.height) * h }
     }
-    const scratch = (e: PointerEvent) => {
-      const p = point(e)
-      const radius = Math.max(14, wrap.clientHeight * 0.22)
+    const dpr = () => Math.min(window.devicePixelRatio || 1, 2)
+    const scratchAt = (clientX: number, clientY: number) => {
+      const p = point(clientX, clientY)
+      // A fingertip-sized brush.
+      const radius = Math.max(16, (canvas.height / dpr()) * 0.24)
       ctx.globalCompositeOperation = 'destination-out'
+      // Fully opaque, so each stroke removes the foil completely (the hatching left a faint colour).
+      ctx.strokeStyle = '#000'
       ctx.lineCap = 'round'
       ctx.lineWidth = radius * 2
       ctx.beginPath()
@@ -109,6 +124,7 @@ function ScratchCard({ label, children }: { label: string; children: ReactNode }
       ctx.stroke()
       last = p
       scratched = true
+      if (++strokes % 5 === 0) check()
     }
     const cleared = () => {
       const { data } = ctx.getImageData(0, 0, canvas.width, canvas.height)
@@ -120,28 +136,87 @@ function ScratchCard({ label, children }: { label: string; children: ReactNode }
       }
       return clear / total
     }
-    const down = (e: PointerEvent) => {
-      canvas.setPointerCapture(e.pointerId)
+    // Once about a third of the foil is gone, the rest falls away by itself with a burst
+    // of glitter and confetti, and a shower of petals across the scene.
+    const reveal = () => {
+      if (done) return
+      done = true
+      setRevealed(true)
+      navigator.vibrate?.(35)
+      celebrate(wrap, document.querySelector('.is-lite') !== null)
+      window.dispatchEvent(new CustomEvent('invite:celebrate'))
+    }
+    const check = () => {
+      if (!done && cleared() >= REVEAL_AT) reveal()
+    }
+    const begin = (x: number, y: number) => {
+      active = true
       last = null
-      scratch(e)
+      scratchAt(x, y)
     }
-    const move = (e: PointerEvent) => {
-      if (canvas.hasPointerCapture(e.pointerId)) scratch(e)
-    }
-    const up = () => {
+    const end = () => {
+      if (!active) return
+      active = false
       last = null
-      if (cleared() > 0.45) setRevealed(true)
+      check()
     }
-    canvas.addEventListener('pointerdown', down)
-    canvas.addEventListener('pointermove', move)
-    canvas.addEventListener('pointerup', up)
-    canvas.addEventListener('pointercancel', up)
+
+    /* Mouse and pen (and touch where pointer events are reliable). The pointer is tracked
+       by id rather than by pointer capture, which some phones do not keep for touch. */
+    const onPointerDown = (e: PointerEvent) => {
+      if (done || (e.pointerType === 'mouse' && e.button !== 0)) return
+      e.preventDefault() // no text selection or image drag from the press
+      pointerId = e.pointerId
+      try {
+        canvas.setPointerCapture(e.pointerId)
+      } catch {
+        // Not essential: moves are matched by pointer id.
+      }
+      begin(e.clientX, e.clientY)
+    }
+    const onPointerMove = (e: PointerEvent) => {
+      if (done || !active || e.pointerId !== pointerId) return
+      e.preventDefault()
+      scratchAt(e.clientX, e.clientY)
+    }
+    const onPointerUp = (e: PointerEvent) => {
+      if (e.pointerId === pointerId) end()
+    }
+    /* Touch events as well: on phones the browser may cancel the pointer stream to scroll or
+       zoom, but touchmove keeps arriving, and blocking its default keeps the page still.
+       Scratching the same spot twice is harmless. */
+    const onTouchStart = (e: TouchEvent) => {
+      if (done) return
+      e.preventDefault()
+      const t = e.touches[0]
+      if (!active) begin(t.clientX, t.clientY)
+    }
+    const onTouchMove = (e: TouchEvent) => {
+      if (done) return
+      e.preventDefault()
+      const t = e.touches[0]
+      if (!active) begin(t.clientX, t.clientY)
+      else scratchAt(t.clientX, t.clientY)
+    }
+    const touchOpts = { passive: false } as const
+    canvas.addEventListener('pointerdown', onPointerDown)
+    canvas.addEventListener('pointermove', onPointerMove)
+    canvas.addEventListener('pointerup', onPointerUp)
+    canvas.addEventListener('pointercancel', onPointerUp)
+    canvas.addEventListener('touchstart', onTouchStart, touchOpts)
+    canvas.addEventListener('touchmove', onTouchMove, touchOpts)
+    canvas.addEventListener('touchend', end)
+    canvas.addEventListener('touchcancel', end)
     return () => {
       ro.disconnect()
-      canvas.removeEventListener('pointerdown', down)
-      canvas.removeEventListener('pointermove', move)
-      canvas.removeEventListener('pointerup', up)
-      canvas.removeEventListener('pointercancel', up)
+      canvas.removeEventListener('pointerdown', onPointerDown)
+      canvas.removeEventListener('pointermove', onPointerMove)
+      canvas.removeEventListener('pointerup', onPointerUp)
+      canvas.removeEventListener('pointercancel', onPointerUp)
+      canvas.removeEventListener('touchstart', onTouchStart)
+      canvas.removeEventListener('touchmove', onTouchMove)
+      canvas.removeEventListener('touchend', end)
+      canvas.removeEventListener('touchcancel', end)
     }
   }, [label])
 
@@ -213,12 +288,23 @@ export function StoryText({ cfg, chapters, intro, top }: { cfg: WeddingConfig; c
 
 export function LittleHeartsText({ cfg, top }: { cfg: WeddingConfig; top: number }) {
   const { title, names, message } = cfg.littleHearts
+  // English names joined with "&" go one per line; other joins (e.g. "एवं") stay on one line.
+  const parts = names.split(/\s+&\s+/).map((n) => n.trim()).filter(Boolean)
   return (
-    <TextBlock top={top} width={64}>
+    <TextBlock top={top} width={78}>
       <p className="reveal t-caps">{title}</p>
-      {names.trim() && (
+      {parts.length > 0 && (
         <p className="t-little-names gilt">
-          <SplitText text={names} />
+          {parts.map((n, i) => (
+            <span key={n}>
+              {i > 0 && (
+                <span className="amp">
+                  <span className="ch">&amp;</span>
+                </span>
+              )}
+              <SplitText className="nm" text={n} />
+            </span>
+          ))}
         </p>
       )}
       {message.map((m) => (
@@ -230,35 +316,21 @@ export function LittleHeartsText({ cfg, top }: { cfg: WeddingConfig; top: number
   )
 }
 
-export function FamilyWelcomeText({ cfg, top }: { cfg: WeddingConfig; top: number }) {
+export function FamilyWelcomeText({ cfg, part, top }: { cfg: WeddingConfig; part: 'hearty' | 'special'; top: number }) {
   const { heartyTitle, hearty, specialTitle, special } = cfg.welcome
+  const [title, names] = part === 'hearty' ? [heartyTitle, hearty] : [specialTitle, special]
   return (
     <TextBlock top={top} width={88}>
-      {hearty.length > 0 && (
-        <>
-          <p className="t-welcome-title gilt">
-            <SplitText text={heartyTitle} />
-          </p>
-          <ul className="reveal name-list">
-            {hearty.map((n) => (
-              <li key={n}>{n}</li>
-            ))}
-          </ul>
-        </>
-      )}
-      {hearty.length > 0 && special.length > 0 && <Rule />}
-      {special.length > 0 && (
-        <>
-          <p className="t-welcome-title gilt">
-            <SplitText text={specialTitle} />
-          </p>
-          <ul className={`reveal name-list${special.length > 4 ? ' two-col' : ''}`}>
-            {special.map((n) => (
-              <li key={n}>{n}</li>
-            ))}
-          </ul>
-        </>
-      )}
+      <p className="t-welcome-title gilt">
+        <SplitText text={title} />
+      </p>
+      <Rule />
+      <ul className="reveal name-list">
+        {names.map((n) => (
+          <li key={n}>{n}</li>
+        ))}
+      </ul>
+      <Rule />
     </TextBlock>
   )
 }

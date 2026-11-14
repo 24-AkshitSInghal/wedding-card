@@ -58,7 +58,7 @@ export function weddingDateLine(cfg: WeddingConfig): string {
   if (!dates.length) return ''
   const parsed = dates.map((d) => parseDate(d)!)
   const sameMonth = parsed.every((p) => p.m === parsed[0].m && p.y === parsed[0].y)
-  if (!sameMonth) return `${formatDate(dates[0])} – ${formatDate(dates[dates.length - 1])}`
+  if (!sameMonth) return `${formatDate(dates[0])} - ${formatDate(dates[dates.length - 1])}`
   const days = parsed.map((p) => ordinal(p.d))
   const list = days.length > 1 ? `${days.slice(0, -1).join(', ')} & ${days[days.length - 1]}` : days[0]
   return `${list} ${MONTHS[parsed[0].m - 1]}, ${parsed[0].y}`

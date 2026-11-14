@@ -18,7 +18,8 @@
  *    a wa.me/… WhatsApp link or a mailto: link all work). `rsvp.contacts`
  *    are listed in the closing as tap-to-call numbers.
  *  • Background music only appears when `audio.src` points at a file you
- *    have the rights to use (put it in /public/audio/). It never autoplays.
+ *    have the rights to use (put it in /public/audio/). It starts with the
+ *    guest's first tap or swipe; the button in the corner mutes it.
  */
 
 export type SceneKey =
@@ -110,7 +111,9 @@ export interface WeddingConfig {
   events: WeddingEvent[]
   /** Live countdown to the wedding, with a scratch card that reveals the date. Set `show: false` to hide. */
   countdown: { show: boolean; mantra: string; title: string; scratchLabel: string }
-  /** "Our Story": an introduction and chapters (split across two scenes when there are more than two). */
+  /** A single line shown on its own slide after the schedule, e.g. "Under the stars". "" hides that slide. */
+  eveningLine: string
+  /** "Our Story": an introduction and chapters (three to a slide). */
   story: { title: string; intro: string; chapters: StoryChapter[] }
   /** A welcome from the little ones of the family. Leave `names` empty to hide. */
   littleHearts: { title: string; names: string; message: string[] }
@@ -158,7 +161,7 @@ export const wedding: WeddingConfig = {
       { name: 'Ishwar Dayal Anil Kumar, Dehradun', phone: '8909554143' },
     ],
   },
-  audio: { src: '', title: '' },
+  audio: { src: '/audio/wedding-song.mp3', title: '' },
   timezone: 'Asia/Kolkata',
   siteUrl: '',
   showPlaceholders: true,
@@ -186,6 +189,7 @@ export const wedding: WeddingConfig = {
       mapUrl: 'https://www.google.com/maps/search/?api=1&query=Moolchand+Resorts+Meerut+Road+Bahadarpur+Muzaffarnagar',
     },
   ],
+  eveningLine: 'Under the stars',
   countdown: {
     show: true,
     // "Ganesh Ji ka mantra" from the card; change it to the exact words you want.
@@ -196,12 +200,11 @@ export const wedding: WeddingConfig = {
   story: {
     title: 'Our Story',
     intro:
-      'Some love stories are written in the stars — ours began with a single glance across a crowded room and has only grown more beautiful with every passing season.',
+      'Some love stories are written in the stars. Ours began with a single glance across a crowded room and has only grown more beautiful with every passing season.',
     chapters: [
-      { title: 'The Meeting', text: 'Two families met — and two hearts quietly recognised each other.' },
+      { title: 'The Meeting', text: 'Two families met, and two hearts quietly recognised each other.' },
       { title: 'The Knowing', text: 'Slow conversations turned into the certainty of finding the right person.' },
       { title: 'The Promise', text: 'With blessings all around, a connection became a forever promise.' },
-      { title: 'Forever Begins', text: 'Surrounded by love, the most beautiful chapter of our lives begins.' },
     ],
   },
   littleHearts: {
@@ -215,8 +218,8 @@ export const wedding: WeddingConfig = {
   },
   welcome: {
     heartyTitle: 'Hearty Welcome By',
-    hearty: ['Renuka – Anil Kumar Bansal', 'Prerna – Sushil Bansal', 'Mansi – Praveen Bansal', 'Sakshi – Manik Bansal'],
+    hearty: ['Renuka - Anil Kumar Bansal', 'Prerna - Sushil Bansal', 'Mansi - Praveen Bansal', 'Sakshi - Manik Bansal'],
     specialTitle: 'Special Invitation From',
-    special: ['Vandana – Alok Ji', 'Akshita – Sparsh Ji', 'Avish', 'Pranav', 'Paridhi', 'Aryan', 'Lakshay', 'Aarushi'],
+    special: ['Vandana - Alok Ji', 'Akshita - Sparsh Ji', 'Avish', 'Pranav', 'Paridhi', 'Aryan', 'Lakshay', 'Aarushi'],
   },
 }

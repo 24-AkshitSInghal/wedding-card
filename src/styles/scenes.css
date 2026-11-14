@@ -404,31 +404,147 @@
   to { stroke-dashoffset: 0; }
 }
 
+/* Once loaded, the opening asks for a tap: that tap is what lets the song play. */
+.veil-open {
+  position: absolute;
+  left: 50%;
+  bottom: calc(14vh + env(safe-area-inset-bottom, 0px));
+  translate: -50% 0;
+  padding: 0.8em 1.9em 0.75em;
+  border: 1px solid rgb(231 194 124 / 0.8);
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgb(120 30 36 / 0.9), rgb(60 12 16 / 0.9));
+  color: var(--gold-hi);
+  font: 600 15px/1.2 Cinzel, 'Tiro Devanagari Hindi', serif;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgb(0 0 0 / 0.4);
+  -webkit-tap-highlight-color: transparent;
+  animation: veil-open-in 0.8s ease both, veil-open-pulse 2.2s ease-in-out 0.8s infinite;
+}
+.lang-hi .veil-open {
+  letter-spacing: 0.02em;
+  font-size: 17px;
+}
+.veil-open:focus-visible {
+  outline: 2px solid var(--gold-hi);
+  outline-offset: 4px;
+}
+.is-waiting .veil-mark svg {
+  animation: none;
+  stroke-dashoffset: 0;
+}
+@keyframes veil-open-in {
+  from { opacity: 0; translate: -50% 10px; }
+  to { opacity: 1; translate: -50% 0; }
+}
+@keyframes veil-open-pulse {
+  0%, 100% { box-shadow: 0 6px 20px rgb(0 0 0 / 0.4), 0 0 0 0 rgb(247 220 148 / 0.4); }
+  50% { box-shadow: 0 6px 20px rgb(0 0 0 / 0.4), 0 0 0 10px rgb(247 220 148 / 0); }
+}
+
 /* ── Sound ───────────────────────────────────────────────────────────────── */
 
 .sound-toggle {
   position: fixed;
-  right: calc(14px + env(safe-area-inset-right, 0px));
-  bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+  right: calc(16px + env(safe-area-inset-right, 0px));
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
   z-index: 600;
-  width: 42px;
-  height: 42px;
+  width: 50px;
+  height: 50px;
+  padding: 0;
   display: grid;
   place-items: center;
   border-radius: 50%;
-  border: 1px solid rgb(231 194 124 / 0.6);
-  background: rgb(30 14 10 / 0.45);
-  color: var(--gold-hi);
+  border: 1px solid rgb(231 194 124 / 0.75);
+  background: radial-gradient(circle at 50% 40%, rgb(120 30 36 / 0.85), rgb(40 8 10 / 0.85));
+  -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
+  color: var(--gold-hi);
+  box-shadow: 0 4px 14px rgb(0 0 0 / 0.35);
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 .sound-toggle svg {
-  width: 20px;
-  height: 20px;
+  width: 21px;
+  height: 21px;
+  margin-top: -5px;
+}
+/* A dotted gold ring that turns while the song plays. */
+.sound-ring {
+  position: absolute;
+  inset: -5px;
+  border-radius: 50%;
+  border: 1.5px dashed rgb(231 194 124 / 0.7);
+  opacity: 0.35;
+  transition: opacity 0.4s ease;
+}
+/* Three little level bars under the note, dancing with the music. */
+.sound-bars {
+  position: absolute;
+  bottom: 9px;
+  left: 50%;
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 7px;
+  margin-left: -5px;
+}
+.sound-bars i {
+  width: 2px;
+  height: 2px;
+  border-radius: 1px;
+  background: currentColor;
+  opacity: 0.6;
+}
+.sound-toggle.is-on {
+  animation: sound-pulse 2.4s ease-in-out infinite;
+}
+.sound-toggle.is-on .sound-ring {
+  opacity: 1;
+  animation: sound-spin 6s linear infinite;
+}
+.sound-toggle.is-on svg {
+  animation: sound-bob 1.2s ease-in-out infinite alternate;
+}
+.sound-toggle.is-on .sound-bars i {
+  opacity: 1;
+  animation: sound-level 0.9s ease-in-out infinite alternate;
+}
+.sound-toggle.is-on .sound-bars i:nth-child(2) {
+  animation-duration: 0.6s;
+  animation-delay: -0.3s;
+}
+.sound-toggle.is-on .sound-bars i:nth-child(3) {
+  animation-duration: 0.75s;
+  animation-delay: -0.5s;
+}
+@keyframes sound-spin {
+  to { rotate: 360deg; }
+}
+@keyframes sound-bob {
+  from { translate: 0 0; rotate: -6deg; }
+  to { translate: 0 -2px; rotate: 6deg; }
+}
+@keyframes sound-level {
+  from { height: 2px; }
+  to { height: 7px; }
+}
+@keyframes sound-pulse {
+  0%, 100% { box-shadow: 0 4px 14px rgb(0 0 0 / 0.35), 0 0 0 0 rgb(247 220 148 / 0.35); }
+  50% { box-shadow: 0 4px 14px rgb(0 0 0 / 0.35), 0 0 0 8px rgb(247 220 148 / 0); }
 }
 .sound-toggle:focus-visible {
   outline: 2px solid var(--gold-hi);
-  outline-offset: 3px;
+  outline-offset: 5px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sound-toggle.is-on,
+  .sound-toggle.is-on * {
+    animation: none !important;
+  }
 }
 
 /* ── Low-power devices ───────────────────────────────────────────────────── */

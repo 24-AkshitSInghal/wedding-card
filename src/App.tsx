@@ -9,7 +9,6 @@ import type { ParticlesHandle } from './components/Particles'
 import { Scene } from './components/Scene'
 import { ScreenReaderInvitation } from './components/SceneTexts'
 import { ScreenReaderSections } from './components/SectionTexts'
-import { SoundToggle } from './components/SoundToggle'
 import { wedding } from './config/wedding'
 import { weddingHi } from './config/wedding.hi'
 import { createPreloader, isLiteDevice, whenLoaded } from './engine/preload'
@@ -17,6 +16,7 @@ import { buildScenes } from './engine/schedule'
 import { buildTimeline } from './engine/timeline'
 import { artUrl } from './lib/art'
 import { localize, t } from './lib/i18n'
+import { music } from './lib/music'
 import type { Lang } from './lib/i18n'
 import './styles/text.css'
 import './styles/scenes.css'
@@ -45,12 +45,44 @@ export default function App({ lang, onToggleLang }: Props) {
   const bloomRef = useRef<HTMLDivElement>(null)
   const particles = useRef<ParticlesHandle>(null)
   const [ready, setReady] = useState(false)
+  // The guest opens the invitation with a tap, which is what lets the song play from the
+  // very start (browsers allow sound only after a tap). Asked once per visit.
+  const [opened, setOpened] = useState(music.opened)
+  const shown = ready && opened
   const [lite, setLite] = useState(isLiteDevice)
   const [reduced, setReduced] = useState(() => window.matchMedia(REDUCE_QUERY).matches)
 
+  // Once loaded, try to start the song straight away; where the browser allows it, the
+  // invitation opens without the tap.
+  useEffect(() => {
+    if (!ready || opened) return
+    let live = true
+    void music.play().then((ok) => {
+      if (ok && live) {
+        music.markOpened()
+        setOpened(true)
+      }
+    })
+    return () => {
+      live = false
+    }
+  }, [ready, opened])
+  const open = () => {
+    void music.play()
+    music.markOpened()
+    setOpened(true)
+  }
+
+  // The scratch card's reveal sends a shower of petals across the whole scene.
+  useEffect(() => {
+    const shower = () => particles.current?.burst(28)
+    window.addEventListener('invite:celebrate', shower)
+    return () => window.removeEventListener('invite:celebrate', shower)
+  }, [])
+
   // If the device struggles once the gateway is on screen, fall back to the lighter look.
   useEffect(() => {
-    if (!ready || lite) return
+    if (!shown || lite) return
     const deltas: number[] = []
     const start = performance.now()
     let last = 0
@@ -69,7 +101,7 @@ export default function App({ lang, onToggleLang }: Props) {
     }
     raf = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(raf)
-  }, [ready, lite])
+  }, [shown, lite])
 
   // Follow the guest's motion preference if it changes while the page is open.
   useEffect(() => {
@@ -259,7 +291,7 @@ export default function App({ lang, onToggleLang }: Props) {
     <div
       ref={rootRef}
       lang={lang}
-      className={`invite lang-${lang} at-start${ready ? ' is-ready' : ''}${lite ? ' is-lite' : ''}${reduced ? ' is-reduced' : ''}`}
+      className={`invite lang-${lang} at-start${shown ? ' is-ready' : ''}${ready && !opened ? ' is-waiting' : ''}${lite ? ' is-lite' : ''}${reduced ? ' is-reduced' : ''}`}
     >
       <div ref={trackRef} className="scroll-track" style={{ height: `${(total + 1) * 100}vh` } as CSSProperties} />
 
@@ -285,9 +317,7 @@ export default function App({ lang, onToggleLang }: Props) {
       {!reduced && <Particles ref={particles} lite={lite} />}
       <div className="grain" />
 
-      {cfg.audio.src.trim() && ready && <SoundToggle src={cfg.audio.src} title={cfg.audio.title} />}
-
-      <div className="veil" role="status" aria-hidden={ready}>
+      <div className="veil" role="status" aria-hidden={shown}>
         <span className="sr-only">{t('opening')}</span>
         <div className="veil-mark" aria-hidden="true">
           <svg viewBox="0 0 100 100" aria-hidden="true">
@@ -295,6 +325,11 @@ export default function App({ lang, onToggleLang }: Props) {
           </svg>
           <img src={artUrl('monogram')} alt="" draggable={false} />
         </div>
+        {ready && !opened && (
+          <button type="button" className="veil-open" onClick={open} autoFocus>
+            {t('tapToOpen')}
+          </button>
+        )}
       </div>
     </div>
   )

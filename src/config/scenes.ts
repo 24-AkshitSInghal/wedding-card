@@ -77,8 +77,9 @@ export interface ScenePreset {
   enterDur: number
   layers: LayerDef[]
   extras?: Extra[]
-  /** Top of the text block as a fraction of frame height. */
-  textTop: number
+  /** Where the middle of the text block sits, as a fraction of the 9:16 frame's height.
+   *  The words are centred on this line whatever their length or language. */
+  textMid: number
 }
 
 const ARCH: LayerDef = { src: 'arch_event', w: 100, wh: 0.5, anchor: 'top', y: 0, d: 0, role: 'arch', glint: true }
@@ -106,7 +107,7 @@ export const OPENING: ScenePreset = {
   air: air([{ kind: 'blossom', colors: BLOSSOM, weight: 3 }, { kind: 'petal', colors: PINK, weight: 2 }], true),
   enter: 'gate',
   enterDur: 0,
-  textTop: 0.62,
+  textMid: 0.7,
   layers: [
     { src: 'garden_side', w: 84, x: -142, anchor: 'bottom', y: 0, d: 0.1, wing: true },
     { src: 'garden_side', w: 84, x: 142, anchor: 'bottom', y: 0, d: 0.1, flip: true, wing: true },
@@ -126,7 +127,7 @@ export const COUPLE: ScenePreset = {
   shower: 26,
   enter: 'gate',
   enterDur: 2.0,
-  textTop: 0.218,
+  textMid: 0.43,
   extras: [],
   layers: [
     // Through the gateway: the couple framed by the palace's carved arch, terraces beyond.
@@ -151,7 +152,7 @@ export const BLESSING: ScenePreset = {
   air: air([{ kind: 'petal', colors: ROSE, weight: 3 }, { kind: 'leaf', colors: LEAF, weight: 1 }]),
   enter: 'crane',
   enterDur: 1.0,
-  textTop: 0.035,
+  textMid: 0.345,
   extras: ['fan'],
   layers: [
     { src: 'palace_terrace', w: 125, x: -110, anchor: 'bottom', y: 2, d: -0.2, wing: true },
@@ -172,7 +173,7 @@ export const EVENT_SCENES: Record<string, ScenePreset> = {
     shower: 12,
     enter: 'truck',
     enterDur: 1.0,
-    textTop: 0.27,
+    textMid: 0.46,
     extras: ['henna'],
     layers: [
       ...COLONNADE,
@@ -192,7 +193,7 @@ export const EVENT_SCENES: Record<string, ScenePreset> = {
     shower: 20,
     enter: 'truck',
     enterDur: 1.0,
-    textTop: 0.27,
+    textMid: 0.46,
     extras: ['rays'],
     layers: [
       ...COLONNADE,
@@ -210,7 +211,7 @@ export const EVENT_SCENES: Record<string, ScenePreset> = {
     shower: 12,
     enter: 'iris',
     enterDur: 1.0,
-    textTop: 0.28,
+    textMid: 0.47,
     extras: ['fairy-lights'],
     layers: [
       ...COLONNADE,
@@ -233,7 +234,7 @@ export const EVENT_SCENES: Record<string, ScenePreset> = {
     shower: 18,
     enter: 'procession',
     enterDur: 1.15,
-    textTop: 0.235,
+    textMid: 0.45,
     layers: [
       ...COLONNADE,
       ARCH,
@@ -253,7 +254,7 @@ export const EVENT_SCENES: Record<string, ScenePreset> = {
     shower: 30,
     enter: 'curtain',
     enterDur: 1.1,
-    textTop: 0.255,
+    textMid: 0.46,
     layers: [
       ...COLONNADE,
       ARCH,
@@ -273,7 +274,7 @@ export const EVENT_SCENES: Record<string, ScenePreset> = {
     shower: 18,
     enter: 'bloom',
     enterDur: 1.0,
-    textTop: 0.225,
+    textMid: 0.43,
     extras: ['rays'],
     layers: [
       ...COLONNADE,
@@ -300,7 +301,7 @@ export const COUNTDOWN: ScenePreset = {
   shower: 14,
   enter: 'truck',
   enterDur: 1.0,
-  textTop: 0.28,
+  textMid: 0.48,
   extras: ['rays'],
   layers: [
     ...COLONNADE,
@@ -321,7 +322,7 @@ export const STORY_INTRO: ScenePreset = {
   shower: 10,
   enter: 'curtain',
   enterDur: 1.0,
-  textTop: 0.25,
+  textMid: 0.46,
   layers: [
     ...COLONNADE,
     ARCH,
@@ -338,7 +339,7 @@ export const STORY_ONE: ScenePreset = {
   air: air([{ kind: 'blossom', colors: PINK, weight: 2 }, { kind: 'leaf', colors: LEAF, weight: 2 }]),
   enter: 'truck',
   enterDur: 1.0,
-  textTop: 0.26,
+  textMid: 0.48,
   layers: [
     ...COLONNADE,
     ARCH,
@@ -357,7 +358,7 @@ export const STORY_TWO: ScenePreset = {
   shower: 10,
   enter: 'iris',
   enterDur: 1.0,
-  textTop: 0.25,
+  textMid: 0.47,
   extras: ['fairy-lights'],
   layers: [
     ...COLONNADE,
@@ -377,7 +378,7 @@ export const LITTLE_HEARTS: ScenePreset = {
   shower: 22,
   enter: 'truck',
   enterDur: 1.0,
-  textTop: 0.275,
+  textMid: 0.49,
   layers: [
     ...COLONNADE,
     ARCH,
@@ -397,7 +398,7 @@ export const FAMILY_WELCOME: ScenePreset = {
   shower: 12,
   enter: 'crane',
   enterDur: 1.0,
-  textTop: 0.235,
+  textMid: 0.53,
   layers: [
     ...COLONNADE,
     ARCH,
@@ -406,6 +407,14 @@ export const FAMILY_WELCOME: ScenePreset = {
     { src: 'brass_urn', w: 16, x: -38, anchor: 'bottom', y: 4, d: 0.5 },
     { src: 'brass_urn', w: 16, x: 38, anchor: 'bottom', y: 4, d: 0.5, flip: true },
   ],
+}
+
+/** The second family list: the same colonnade, in deep emerald, opening with an iris. */
+export const FAMILY_SPECIAL: ScenePreset = {
+  ...FAMILY_WELCOME,
+  palette: { center: '#2f6a4c', mid: '#1f4f37', edge: '#0b2416', ink: '#fbecd2' },
+  air: air([{ kind: 'petal', colors: ROSE, weight: 1 }, { kind: 'marigold', colors: MARIGOLD, weight: 2 }]),
+  enter: 'iris',
 }
 
 /**
@@ -418,7 +427,7 @@ export const CLOSING: ScenePreset = {
   shower: 30,
   enter: 'lift',
   enterDur: 1.1,
-  textTop: 0.33,
+  textMid: 0.525,
   extras: ['border', 'medallion'],
   layers: [
     { src: 'palace_terrace', w: 125, x: -108, anchor: 'bottom', y: 2, d: -0.3, wing: true },

@@ -18,6 +18,7 @@ export interface WeddingOverrides {
   /** Keyed by event id. */
   events?: Record<string, Partial<Pick<WeddingEvent, 'title' | 'note' | 'venue' | 'address' | 'timeSuffix'>>>
   countdown?: Partial<Pick<WeddingConfig['countdown'], 'title' | 'scratchLabel' | 'mantra'>>
+  eveningLine?: string
   story?: { title?: string; intro?: string; chapters?: StoryChapter[] }
   littleHearts?: Partial<WeddingConfig['littleHearts']>
   welcome?: Partial<WeddingConfig['welcome']>
@@ -39,6 +40,7 @@ const UI = {
     onwards: 'onwards',
     foreverBegun: 'Forever has begun',
     opening: 'Opening the invitation…',
+    tapToOpen: 'Tap to open',
     switchTo: 'हिन्दी',
     switchLabel: 'हिन्दी में पढ़ें (Read in Hindi)',
   },
@@ -56,6 +58,7 @@ const UI = {
     onwards: 'से',
     foreverBegun: 'अनंत का आरंभ हो चुका है',
     opening: 'निमंत्रण खुल रहा है…',
+    tapToOpen: 'खोलने के लिए स्पर्श करें',
     switchTo: 'English',
     switchLabel: 'Read in English (अंग्रेज़ी में पढ़ें)',
   },
@@ -118,6 +121,7 @@ export function localize(cfg: WeddingConfig, over: WeddingOverrides | null): Wed
     },
     events: cfg.events.map((e) => ({ ...e, ...over.events?.[e.id] })),
     countdown: { ...cfg.countdown, ...over.countdown },
+    eveningLine: pick(over.eveningLine, cfg.eveningLine),
     story: {
       title: pick(over.story?.title, cfg.story.title),
       intro: pick(over.story?.intro, cfg.story.intro),

@@ -1,9 +1,16 @@
 /* ── Invitation typography ───────────────────────────────────────────────── */
 
 .scene-text {
+  /* A zero-height line at the scene's text centre; the words are centred on it, so a
+     longer block (or the Hindi version) grows evenly up and down instead of downward.
+     On tall phones the art spreads apart, so the centre moves down with it. */
   position: absolute;
   left: 50%;
-  top: calc(var(--fh) * var(--top) + var(--tall) * 0.42);
+  top: calc(var(--fw) * 1.7778 * var(--mid) + var(--tall) * 0.6);
+  height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   width: calc(var(--u) * var(--tw, 74));
   margin-left: calc(var(--u) * var(--tw, 74) / -2);
   z-index: calc(var(--zs) + 40);
@@ -14,8 +21,12 @@
 .scene:not(.is-off) .scene-text {
   will-change: transform, opacity;
 }
+.scene-text-inner {
+  position: relative;
+  flex: none;
+}
 /* A soft pool of shade behind the words keeps small caps legible on the lighter grounds. */
-.scene-text::before {
+.scene-text-inner::before {
   content: '';
   position: absolute;
   inset: -10% -16% -8%;
@@ -27,7 +38,8 @@
   text-shadow: none;
 }
 .scene-text-inner > *,
-.scene-text-inner > .chapter > * {
+.scene-text-inner > .chapter > *,
+.scene-text-inner > .schedule-item > * {
   margin: 0;
 }
 /* Shorter screens (9:16 phones, desktop) have less height for the same width, so the
@@ -71,17 +83,17 @@
   font-family: var(--display);
   font-style: italic;
   font-weight: 500;
-  font-size: clamp(40px, calc(var(--u) * 12.5), 72px);
-  line-height: 1.08;
-  margin: 0.25em 0 0.22em !important;
+  font-size: clamp(50px, calc(var(--u) * 16), 92px);
+  line-height: 1.04;
+  margin: 0.2em 0 0.18em !important;
 }
 .t-names .nm {
   display: block;
 }
 .t-names .amp {
   display: block;
-  margin: 0.04em 0 0.08em;
-  font-size: 0.62em;
+  margin: 0.02em 0 0.06em;
+  font-size: 0.55em;
   line-height: 1;
 }
 .t-families .fam {
@@ -102,6 +114,26 @@
   /* room for script swashes that overhang the glyph box */
   padding: 0.12em 0.2em;
   margin: -0.12em -0.2em;
+}
+
+/* A band of light sweeps across gilded lettering every few seconds, letter by letter,
+   like the glint that runs over the gold in the artwork. */
+.shine .ch {
+  background:
+    linear-gradient(105deg, transparent 38%, rgb(255 249 228 / 0.95) 50%, transparent 62%) 160% 0 / 320% 100% no-repeat,
+    linear-gradient(178deg, var(--gold-hi) 10%, var(--gold) 52%, #d4a55a 74%, #f7dfa6 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: shine 6s ease-in-out infinite;
+  animation-delay: calc(1.4s + var(--i, 0) * 70ms);
+}
+@keyframes shine {
+  0% { background-position: 160% 0, 0 0; }
+  16%, 100% { background-position: -60% 0, 0 0; }
+}
+.is-reduced .shine .ch,
+.is-lite .shine .ch {
+  animation: none;
 }
 
 .t-fullname {
@@ -204,6 +236,34 @@
   line-height: 1.3;
   margin-top: 0.15em !important;
   text-wrap: balance;
+}
+
+/* Venue slide: the resort's name set large under the title. */
+.t-venue--big {
+  font-size: clamp(19px, calc(var(--u) * 5.6), 31px);
+  margin-top: 0.6em !important;
+}
+.t-venue--big + .t-address {
+  margin-top: 0.4em !important;
+}
+
+/* Schedule slide: one block per event, divided by a rule. */
+.schedule-item {
+  margin-top: 0.5em;
+}
+.schedule-item > .ornament-rule {
+  margin: 0.2em auto 0.7em !important;
+}
+
+/* A single line on its own scene. */
+.t-evening {
+  font-family: var(--display);
+  font-style: italic;
+  font-weight: 500;
+  font-size: clamp(34px, calc(var(--u) * 9.6), 56px);
+  line-height: 1.15;
+  white-space: nowrap;
+  margin: 0.3em 0 !important;
 }
 
 .is-placeholder {
@@ -443,6 +503,8 @@
   font-size: clamp(28px, calc(var(--u) * 8), 46px);
   line-height: 1.12;
   text-wrap: balance;
+  max-width: calc(var(--u) * 62);
+  margin-inline: auto !important;
   margin-bottom: 0.45em !important;
 }
 .countdown {
@@ -521,6 +583,45 @@
 }
 .scratch.is-revealed .scratch-foil {
   opacity: 0;
+  transform: scale(1.08);
+  filter: blur(2px) brightness(1.3);
+  pointer-events: none;
+  transition: opacity 0.7s ease, transform 0.7s ease, filter 0.7s ease;
+}
+/* On reveal the card glows, the date settles in and a band of light runs across it. */
+.scratch.is-revealed {
+  animation: scratch-glow 1.6s ease-out;
+}
+.scratch.is-revealed .scratch-under > * {
+  animation: scratch-pop 0.7s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+}
+.scratch.is-revealed .scratch-date {
+  animation-delay: 0.08s;
+  background:
+    linear-gradient(105deg, transparent 38%, rgb(255 251 235 / 0.95) 50%, transparent 62%) 160% 0 / 320% 100% no-repeat,
+    linear-gradient(178deg, var(--gold-hi) 10%, var(--gold) 55%, #f7dfa6 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation:
+    scratch-pop 0.7s cubic-bezier(0.2, 1.4, 0.4, 1) 0.08s both,
+    shine 4.5s ease-in-out 0.5s infinite;
+}
+@keyframes scratch-pop {
+  from { opacity: 0; transform: scale(0.88); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes scratch-glow {
+  0% { box-shadow: 0 6px 18px rgb(0 0 0 / 0.25), inset 0 0 0 1px rgb(231 194 124 / 0.6), 0 0 0 0 rgb(247 220 148 / 0); }
+  25% { box-shadow: 0 6px 18px rgb(0 0 0 / 0.25), inset 0 0 0 1px rgb(247 220 148 / 1), 0 0 34px 8px rgb(247 220 148 / 0.55); }
+  100% { box-shadow: 0 6px 18px rgb(0 0 0 / 0.25), inset 0 0 0 1px rgb(231 194 124 / 0.6), 0 0 0 0 rgb(247 220 148 / 0); }
+}
+.celebrate-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 9999;
   pointer-events: none;
 }
 
@@ -556,9 +657,20 @@
   font-family: var(--display);
   font-style: italic;
   font-weight: 500;
-  font-size: clamp(32px, calc(var(--u) * 9.4), 54px);
-  line-height: 1.15;
+  font-size: clamp(32px, calc(var(--u) * 9), 52px);
+  line-height: 1.1;
   margin: 0.15em 0 0.3em !important;
+}
+/* "Gauvangi & Shridha": one name per line with a small ampersand between, as for the couple. */
+.t-little-names .nm {
+  display: block;
+  white-space: nowrap;
+}
+.t-little-names .amp {
+  display: block;
+  font-size: 0.6em;
+  line-height: 1;
+  margin: 0.05em 0;
 }
 .t-little-msg {
   font-family: var(--serif);
@@ -567,6 +679,8 @@
   font-size: clamp(17px, calc(var(--u) * 4.6), 25px);
   line-height: 1.36;
   text-wrap: balance;
+  max-width: calc(var(--u) * 66);
+  margin-inline: auto !important;
 }
 .t-little-msg + .t-little-msg {
   margin-top: 0.55em !important;
@@ -575,32 +689,27 @@
   font-family: var(--display);
   font-style: italic;
   font-weight: 500;
-  font-size: clamp(26px, calc(var(--u) * 7), 40px);
+  font-size: clamp(24px, calc(var(--u) * 6.5), 37px);
   line-height: 1.15;
-  margin-bottom: 0.25em !important;
+  white-space: nowrap;
+  margin-bottom: 0.1em !important;
+}
+.t-welcome-title + .ornament-rule {
+  margin-bottom: 0.5em !important;
+}
+.name-list + .ornament-rule {
+  margin-top: 0.6em !important;
 }
 .name-list {
   list-style: none;
   padding: 0;
   font-family: var(--serif);
   font-weight: 600;
-  font-size: clamp(18px, calc(var(--u) * 5), 27px);
-  line-height: 1.42;
-}
-.name-list.two-col {
-  display: grid;
-  grid-template-columns: auto auto;
-  justify-content: center;
-  column-gap: 1.1em;
+  font-size: clamp(20px, calc(var(--u) * 5.6), 31px);
+  line-height: 1.6;
 }
 .name-list li {
   white-space: nowrap;
-}
-.name-list.two-col li:nth-child(odd) {
-  text-align: right;
-}
-.name-list.two-col li:nth-child(even) {
-  text-align: left;
 }
 
 .t-story-title {
@@ -630,8 +739,9 @@
   font-family: 'Tiro Devanagari Hindi', var(--serif);
   line-height: 1.5;
 }
-.lang-hi .t-names { font-family: 'Rozha One', serif; font-size: clamp(38px, calc(var(--u) * 11.5), 66px); line-height: 1.3; }
+.lang-hi .t-names { font-family: 'Rozha One', serif; font-size: clamp(46px, calc(var(--u) * 14.5), 84px); line-height: 1.25; }
 .lang-hi .t-event-title,
+.lang-hi .t-evening,
 .lang-hi .t-story-title { font-family: 'Rozha One', serif; font-size: clamp(34px, calc(var(--u) * 10), 58px); line-height: 1.3; }
 .lang-hi .t-fullname { font-family: 'Rozha One', serif; font-size: clamp(30px, calc(var(--u) * 8.6), 48px); }
 .lang-hi .t-families,
@@ -651,11 +761,12 @@
 .lang-hi .t-event-note { font-size: clamp(17px, calc(var(--u) * 4.6), 25px); line-height: 1.55; }
 .lang-hi .t-parents,
 .lang-hi .t-address,
-.lang-hi .t-contact,
-.lang-hi .name-list { font-size: clamp(16px, calc(var(--u) * 4.4), 24px); line-height: 1.5; }
+.lang-hi .t-contact { font-size: clamp(16px, calc(var(--u) * 4.4), 24px); line-height: 1.5; }
+.lang-hi .name-list { font-size: clamp(20px, calc(var(--u) * 5.4), 30px); line-height: 1.7; }
 .lang-hi .t-caps,
 .lang-hi .t-with-love,
 .lang-hi .t-location,
+.lang-hi .t-venue.t-venue--big { font-size: clamp(20px, calc(var(--u) * 5.8), 32px); }
 .lang-hi .t-venue,
 .lang-hi .t-event-time,
 .lang-hi .t-date { font-size: clamp(16px, calc(var(--u) * 4.4), 24px); }
@@ -673,7 +784,7 @@
 /* Shri Ganesh at the head of the blessings, with a soft halo of lamplight. */
 .blessing-ganesha {
   position: relative;
-  width: calc(var(--u) * 24);
+  width: calc(var(--u) * 21);
   margin: 0 auto 0.5em !important;
 }
 .blessing-ganesha::before {
@@ -690,7 +801,7 @@
   filter: drop-shadow(0 3px 6px rgb(30 6 4 / 0.5));
 }
 
-/* The closing carries the most lines, so it uses less of a tall phone's extra height. */
-.scene--closing .scene-text {
-  top: calc(var(--fh) * var(--top) + var(--tall) * 0.18);
+
+.lang-hi .t-little-names .nm {
+  white-space: normal;
 }

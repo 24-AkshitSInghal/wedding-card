@@ -67,6 +67,16 @@ body {
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
+  /* The card is painted, not read like a document: no text selection, dragging or long-press
+     menus anywhere, so a mouse drag scratches the date instead of highlighting words. */
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+body *,
+body *::before,
+body *::after {
+  -webkit-user-drag: none;
 }
 
 img {

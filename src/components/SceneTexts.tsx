@@ -14,7 +14,6 @@ import {
   opensInNewTab,
   safeUrl,
   telHref,
-  weddingDateLine,
 } from '../lib/format'
 import { artUrl } from '../lib/art'
 import { t } from '../lib/i18n'
@@ -28,15 +27,16 @@ import { SplitText } from './SplitText'
  */
 
 interface BlockProps {
+  /** Vertical centre of the block as a fraction of the frame's height. */
   top: number
   width?: number
   children: ReactNode
 }
 
-/** Text block positioned inside the frame. `.reveal` children are faded in by the timeline. */
+/** Text block centred on a line inside the frame. `.reveal` children are faded in by the timeline. */
 export function TextBlock({ top, width, children }: BlockProps) {
   return (
-    <div className="scene-text" data-d="0" data-role="text" style={{ '--top': top, '--tw': width ?? 74 } as CSSProperties}>
+    <div className="scene-text" data-d="0" data-role="text" style={{ '--mid': top, '--tw': width ?? 74 } as CSSProperties}>
       <div className="scene-text-inner">{children}</div>
     </div>
   )
@@ -62,19 +62,19 @@ export function CoupleText({ cfg, top }: { cfg: WeddingConfig; top: number }) {
     <TextBlock top={top} width={72}>
       <p className="reveal t-caps">{cfg.coupleLead}</p>
       {(bride || groom) && (
-        <p className="t-names gilt">
+        <p className="t-names gilt shine">
           {bride && <SplitText className="nm" text={bride} />}
           {bride && groom && (
             <span className="amp">
-              <span className="ch">&amp;</span>
+              <span className="ch" style={{ '--i': bride.length } as CSSProperties}>
+                &amp;
+              </span>
             </span>
           )}
-          {groom && <SplitText className="nm" text={groom} />}
+          {groom && <SplitText className="nm" text={groom} start={bride ? bride.length + 1 : 0} />}
         </p>
       )}
       <p className="reveal t-invite">{cfg.coupleInvite}</p>
-      <Line value={weddingDateLine(cfg)} placeholder="Wedding Date" cfg={cfg} className="t-date" />
-      <Line value={cfg.location} placeholder="Venue" cfg={cfg} className="t-location" />
       {cfg.hashtag.trim() && <p className="reveal t-hashtag">{cfg.hashtag}</p>}
     </TextBlock>
   )
@@ -129,40 +129,70 @@ export function BlessingText({ cfg, top }: { cfg: WeddingConfig; top: number }) 
   )
 }
 
-export function EventText({ cfg, ev, uid, top, henna }: { cfg: WeddingConfig; ev: WeddingEvent; uid: string; top: number; henna?: boolean }) {
-  const time = eventTime(ev)
-  const venue = field(ev.venue, 'Venue', cfg)
-  const showCalendar = canAddToCalendar(ev, cfg)
+/** The venue on a slide of its own: name, address and a link to the map. */
+export function VenueText({ cfg, ev, top }: { cfg: WeddingConfig; ev: WeddingEvent; top: number }) {
   const map = safeUrl(ev.mapUrl)
   return (
     <TextBlock top={top} width={76}>
-      {henna && <Henna />}
       <p className="t-event-title gilt">
-        <SplitText text={ev.title} />
+        <SplitText text={t('venue')} />
       </p>
-      {ev.note?.trim() && <p className="reveal t-event-note">{ev.note}</p>}
-      <Line value={ev.date.trim() ? formatDate(ev.date) : ''} placeholder="Date" cfg={cfg} className="t-event-date" />
-      <Line value={time} placeholder="Time" cfg={cfg} className="t-event-time" />
-      {venue !== null && <p className="reveal t-venue-label">{t('venue')}</p>}
-      <Line value={ev.venue} placeholder="Venue" cfg={cfg} className="t-venue" />
+      <Rule />
+      <Line value={ev.venue} placeholder="Venue" cfg={cfg} className="t-venue t-venue--big" />
       {ev.address?.trim() && <p className="reveal t-address">{ev.address}</p>}
-      {(map || showCalendar) && (
+      {map && (
         <p className="reveal t-actions">
-          {map && (
-            <a className="t-link" href={map} target="_blank" rel="noopener noreferrer" tabIndex={-1}>
-              <PinIcon />
-              {t('viewVenue')}
-            </a>
-          )}
-          {showCalendar && (
-            <button type="button" className="t-link" tabIndex={-1} onClick={() => addToCalendar(ev, cfg, uid)}>
-              <CalendarIcon />
-              {t('addToCalendar')}
-            </button>
-          )}
+          <a className="t-link" href={map} target="_blank" rel="noopener noreferrer" tabIndex={-1}>
+            <PinIcon />
+            {t('viewVenue')}
+          </a>
+        </p>
+      )}
+      <Rule />
+    </TextBlock>
+  )
+}
+
+/** Every event on one slide: the date once, then each title with its time. */
+export function ScheduleText({ cfg, top, henna }: { cfg: WeddingConfig; top: number; henna?: boolean }) {
+  const first = cfg.events[0]
+  const showCalendar = first && canAddToCalendar(first, cfg)
+  return (
+    <TextBlock top={top} width={76}>
+      {henna && <Henna />}
+      {first && <Line value={first.date.trim() ? formatDate(first.date) : ''} placeholder="Date" cfg={cfg} className="t-event-date" />}
+      {cfg.events.map((ev, i) => (
+        <div key={eventUid(ev, i)} className="schedule-item">
+          {i > 0 && <Rule />}
+          <p className="t-event-title gilt">
+            <SplitText text={ev.title} />
+          </p>
+          {ev.note?.trim() && <p className="reveal t-event-note">{ev.note}</p>}
+          <Line value={eventTime(ev)} placeholder="Time" cfg={cfg} className="t-event-time" />
+        </div>
+      ))}
+      {showCalendar && (
+        <p className="reveal t-actions">
+          <button type="button" className="t-link" tabIndex={-1} onClick={() => addToCalendar(first, cfg, eventUid(first, 0))}>
+            <CalendarIcon />
+            {t('addToCalendar')}
+          </button>
         </p>
       )}
       {henna && <Henna flip />}
+    </TextBlock>
+  )
+}
+
+/** A single line resting on its own scene. */
+export function EveningText({ cfg, top }: { cfg: WeddingConfig; top: number }) {
+  return (
+    <TextBlock top={top} width={80}>
+      <Rule />
+      <p className="t-evening gilt">
+        <SplitText text={cfg.eveningLine} />
+      </p>
+      <Rule />
     </TextBlock>
   )
 }
@@ -173,11 +203,10 @@ export function ClosingText({ cfg, top }: { cfg: WeddingConfig; top: number }) {
   return (
     <TextBlock top={top} width={84}>
       <p className="reveal t-with-love">{cfg.closing.lead}</p>
+      {/* Signed by the hosting family. */}
       {(bf || gf) && (
         <p className="t-families gilt">
-          {bf && <SplitText className="fam" text={bf} />}
-          {bf && gf && ' '}
-          {gf && <SplitText className="fam" text={bf ? `& ${gf}` : gf} />}
+          <SplitText className="fam" text={(bf || gf) as string} />
         </p>
       )}
       <Rule />
@@ -225,20 +254,17 @@ export function ScreenReaderInvitation({
 }) {
   const [bride, groom] = coupleNames(cfg)
   const [bf, gf] = familyNames(cfg)
-  const date = weddingDateLine(cfg)
   const rsvp = safeUrl(cfg.rsvp.url)
   // Placeholders are for the person editing the invitation, not for screen-reader guests.
   const real = (v: string | null) => (v && !v.startsWith('[') ? v : null)
   const bp = parentsLine(cfg.brideParentsPrefix, cfg.bride.parents, 'Bride', cfg, cfg.bride.city)
   const gp = parentsLine(cfg.groomParentsPrefix, cfg.groom.parents, 'Groom', cfg, cfg.groom.city)
-  const families = joinNames(real(bf), real(gf))
+  const families = real(bf) || real(gf)
   return (
     <main className="sr-invitation">
       <h1>{joinNames(real(bride), real(groom)) || 'Wedding invitation'}</h1>
       <p>{cfg.coupleLead}</p>
       <p>{cfg.coupleInvite}</p>
-      {date && <p>{date}</p>}
-      {cfg.location.trim() && <p>{cfg.location}</p>}
       {cfg.hashtag.trim() && <p>{cfg.hashtag}</p>}
 
       <section>
@@ -275,12 +301,12 @@ export function ScreenReaderInvitation({
             {ev.address?.trim() && <p>{ev.address}</p>}
             {map && (
               <a href={map} target="_blank" rel="noopener noreferrer">
-                {t('viewVenue')} – {ev.title}
+                {t('viewVenue')} - {ev.title}
               </a>
             )}
             {canAddToCalendar(ev, cfg) && (
               <button type="button" onClick={() => addToCalendar(ev, cfg, eventUid(ev, i))}>
-                {t('addToCalendar')} – {ev.title}
+                {t('addToCalendar')} - {ev.title}
               </button>
             )}
           </section>

@@ -1,18 +1,45 @@
-import { BLESSING, CLOSING, COUNTDOWN, COUPLE, FAMILY_WELCOME, HOLD, LITTLE_HEARTS, OPENING, presetFor, STORY_INTRO, STORY_ONE, STORY_TWO } from '../config/scenes'
+import {
+  BLESSING,
+  CLOSING,
+  COUNTDOWN,
+  COUPLE,
+  FAMILY_SPECIAL,
+  FAMILY_WELCOME,
+  HOLD,
+  LITTLE_HEARTS,
+  OPENING,
+  presetFor,
+  STORY_INTRO,
+  STORY_ONE,
+  STORY_TWO,
+} from '../config/scenes'
 import type { ScenePreset, TransitionType } from '../config/scenes'
 import type { StoryChapter, WeddingConfig, WeddingEvent } from '../config/wedding'
 
-export type SceneKind = 'opening' | 'couple' | 'blessing' | 'countdown' | 'story' | 'event' | 'little' | 'welcome' | 'closing'
+export type SceneKind =
+  | 'opening'
+  | 'couple'
+  | 'blessing'
+  | 'countdown'
+  | 'story'
+  | 'venue'
+  | 'schedule'
+  | 'evening'
+  | 'little'
+  | 'welcome'
+  | 'closing'
 
 export interface SceneModel {
   id: string
   kind: SceneKind
   preset: ScenePreset
+  /** For the venue slide: the event whose venue is shown. */
   event?: WeddingEvent
-  eventIndex?: number
   /** For story scenes: the chapters shown, and whether the introduction leads. */
   chapters?: StoryChapter[]
   intro?: boolean
+  /** For welcome scenes: which of the two family lists is shown. */
+  part?: 'hearty' | 'special'
   /* Timeline positions in scroll units (1 unit = one viewport height of scrolling). */
   start: number // the enter transition begins
   restAt: number // the scene is fully composed
@@ -26,12 +53,12 @@ export interface SceneModel {
 const TAIL = 0.35
 
 export function buildScenes(cfg: WeddingConfig): { scenes: SceneModel[]; total: number } {
-  type Raw = Pick<SceneModel, 'id' | 'kind' | 'preset' | 'event' | 'eventIndex' | 'chapters' | 'intro'> & { hold: number }
+  type Raw = Pick<SceneModel, 'id' | 'kind' | 'preset' | 'event' | 'chapters' | 'intro' | 'part'> & { hold: number }
   // The story opens with its title and introduction on their own slide, then the chapters
-  // follow two to a slide so the words can stay large.
+  // follow three to a slide so the words can stay large.
   const { chapters } = cfg.story
   const pairs: StoryChapter[][] = []
-  for (let i = 0; i < chapters.length; i += 2) pairs.push(chapters.slice(i, i + 2))
+  for (let i = 0; i < chapters.length; i += 3) pairs.push(chapters.slice(i, i + 3))
   const chapterLooks = [STORY_ONE, STORY_TWO]
   const story: Raw[] = chapters.length || cfg.story.intro.trim()
     ? [
@@ -45,6 +72,7 @@ export function buildScenes(cfg: WeddingConfig): { scenes: SceneModel[]; total: 
         })),
       ]
     : []
+  const [first, second] = cfg.events
   const little = cfg.littleHearts
   const { welcome } = cfg
 
@@ -53,20 +81,24 @@ export function buildScenes(cfg: WeddingConfig): { scenes: SceneModel[]; total: 
     { id: 'couple', kind: 'couple', preset: COUPLE, hold: HOLD.couple },
     ...(cfg.countdown.show ? [{ id: 'countdown', kind: 'countdown' as const, preset: COUNTDOWN, hold: HOLD.countdown }] : []),
     ...story,
+    // The venue has a slide of its own; the schedule slide then lists only the times.
+    ...(first?.venue.trim() ? [{ id: 'venue', kind: 'venue' as const, preset: STORY_TWO, hold: HOLD.story, event: first }] : []),
     { id: 'blessing', kind: 'blessing', preset: BLESSING, hold: HOLD.blessing },
-    ...cfg.events.map((event, i) => ({
-      id: `event-${i}-${event.id}`,
-      kind: 'event' as const,
-      preset: presetFor(event.scene, i),
-      hold: HOLD.event,
-      event,
-      eventIndex: i,
-    })),
+    // All the events share one slide, painted as the first event's scene.
+    ...(first ? [{ id: 'schedule', kind: 'schedule' as const, preset: presetFor(first.scene, 0), hold: HOLD.event }] : []),
+    // A single line rests on the second event's scene, e.g. "Under the stars".
+    ...(cfg.eveningLine.trim()
+      ? [{ id: 'evening', kind: 'evening' as const, preset: presetFor(second?.scene ?? 'hasta-melap', 1), hold: HOLD.event }]
+      : []),
     ...(little.names.trim() || little.message.length
       ? [{ id: 'little', kind: 'little' as const, preset: LITTLE_HEARTS, hold: HOLD.welcome }]
       : []),
-    ...(welcome.hearty.length || welcome.special.length
-      ? [{ id: 'welcome', kind: 'welcome' as const, preset: FAMILY_WELCOME, hold: HOLD.welcome }]
+    // Each family list gets its own slide so every name sits on its own line, large.
+    ...(welcome.hearty.length
+      ? [{ id: 'welcome-hearty', kind: 'welcome' as const, preset: FAMILY_WELCOME, hold: HOLD.welcome, part: 'hearty' as const }]
+      : []),
+    ...(welcome.special.length
+      ? [{ id: 'welcome-special', kind: 'welcome' as const, preset: FAMILY_SPECIAL, hold: HOLD.welcome, part: 'special' as const }]
       : []),
     { id: 'closing', kind: 'closing', preset: CLOSING, hold: HOLD.closing },
   ]

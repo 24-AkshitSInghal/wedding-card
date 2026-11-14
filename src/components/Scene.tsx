@@ -1,13 +1,12 @@
 import type { CSSProperties } from 'react'
 import type { WeddingConfig } from '../config/wedding'
 import type { SceneModel } from '../engine/schedule'
-import { eventUid } from '../lib/format'
 import { t } from '../lib/i18n'
 import { Gateway } from './Gateway'
 import { artUrl } from '../lib/art'
 import { Layer } from './Layer'
 import { Doves, FairyLights, Fans, FrameBorder, Medallion } from './Ornaments'
-import { BlessingText, ClosingText, CoupleText, EventText } from './SceneTexts'
+import { BlessingText, ClosingText, CoupleText, EveningText, ScheduleText, VenueText } from './SceneTexts'
 import { CountdownText, FamilyWelcomeText, LittleHeartsText, StoryText } from './SectionTexts'
 
 interface Props {
@@ -67,22 +66,16 @@ export function Scene({ scene, index, cfg, eager }: Props) {
           </Medallion>
         )}
 
-        {scene.kind === 'couple' && <CoupleText cfg={cfg} top={preset.textTop} />}
-        {scene.kind === 'blessing' && <BlessingText cfg={cfg} top={preset.textTop} />}
-        {scene.kind === 'event' && scene.event && (
-          <EventText
-            cfg={cfg}
-            ev={scene.event}
-            uid={eventUid(scene.event, scene.eventIndex ?? 0)}
-            top={preset.textTop}
-            henna={extras.has('henna')}
-          />
-        )}
-        {scene.kind === 'countdown' && <CountdownText cfg={cfg} top={preset.textTop} />}
-        {scene.kind === 'story' && <StoryText cfg={cfg} chapters={scene.chapters ?? []} intro={scene.intro} top={preset.textTop} />}
-        {scene.kind === 'little' && <LittleHeartsText cfg={cfg} top={preset.textTop} />}
-        {scene.kind === 'welcome' && <FamilyWelcomeText cfg={cfg} top={preset.textTop} />}
-        {scene.kind === 'closing' && <ClosingText cfg={cfg} top={preset.textTop} />}
+        {scene.kind === 'couple' && <CoupleText cfg={cfg} top={preset.textMid} />}
+        {scene.kind === 'blessing' && <BlessingText cfg={cfg} top={preset.textMid} />}
+        {scene.kind === 'venue' && scene.event && <VenueText cfg={cfg} ev={scene.event} top={preset.textMid} />}
+        {scene.kind === 'schedule' && <ScheduleText cfg={cfg} top={preset.textMid} henna={extras.has('henna')} />}
+        {scene.kind === 'evening' && <EveningText cfg={cfg} top={preset.textMid} />}
+        {scene.kind === 'countdown' && <CountdownText cfg={cfg} top={preset.textMid} />}
+        {scene.kind === 'story' && <StoryText cfg={cfg} chapters={scene.chapters ?? []} intro={scene.intro} top={preset.textMid} />}
+        {scene.kind === 'little' && <LittleHeartsText cfg={cfg} top={preset.textMid} />}
+        {scene.kind === 'welcome' && <FamilyWelcomeText cfg={cfg} part={scene.part ?? 'hearty'} top={preset.textMid} />}
+        {scene.kind === 'closing' && <ClosingText cfg={cfg} top={preset.textMid} />}
       </div>
     </section>
   )
