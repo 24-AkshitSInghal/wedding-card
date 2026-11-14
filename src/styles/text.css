@@ -39,7 +39,8 @@
 }
 .scene-text-inner > *,
 .scene-text-inner > .chapter > *,
-.scene-text-inner > .schedule-item > * {
+.scene-text-inner > .schedule-item > *,
+.scene-text-inner > .venue-item > * {
   margin: 0;
 }
 /* Shorter screens (9:16 phones, desktop) have less height for the same width, so the
@@ -204,6 +205,16 @@
   letter-spacing: 0.04em;
   margin-top: 0.45em !important;
 }
+.t-event-weekday {
+  font-family: var(--caps);
+  font-size: clamp(12px, calc(var(--u) * 3.3), 17px);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  opacity: 0.9;
+}
+.t-event-weekday + .t-event-date {
+  margin-top: 0.15em !important;
+}
 .t-event-time {
   font-family: var(--caps);
   font-weight: 500;
@@ -245,6 +256,23 @@
 }
 .t-venue--big + .t-address {
   margin-top: 0.4em !important;
+}
+
+/* Several venues: each under its days, divided by a rule. */
+.venue-item.is-several > .ornament-rule {
+  margin: 0.5em auto 0.6em !important;
+}
+.t-venue-days {
+  font-family: var(--caps);
+  font-size: clamp(12px, calc(var(--u) * 3.3), 17px);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  opacity: 0.9;
+  margin-top: 0.5em !important;
+}
+.venue-item.is-several .t-venue--big {
+  font-size: clamp(17px, calc(var(--u) * 4.9), 27px);
+  margin-top: 0.25em !important;
 }
 
 /* Schedule slide: one block per event, divided by a rule. */
@@ -770,6 +798,8 @@
 .lang-hi .t-venue,
 .lang-hi .t-event-time,
 .lang-hi .t-date { font-size: clamp(16px, calc(var(--u) * 4.4), 24px); }
+.lang-hi .t-venue-days,
+.lang-hi .t-event-weekday,
 .lang-hi .t-venue-label,
 .lang-hi .cd-label,
 .lang-hi .scratch-kicker,

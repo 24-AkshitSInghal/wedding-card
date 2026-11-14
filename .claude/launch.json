@@ -26,6 +26,21 @@
         "--strictPort"
       ],
       "port": 4173
+    },
+    {
+      "name": "invite-second",
+      "runtimeExecutable": "/usr/bin/env",
+      "runtimeArgs": [
+        "CARD=second",
+        "npm",
+        "run",
+        "dev",
+        "--",
+        "--port",
+        "5175",
+        "--strictPort"
+      ],
+      "port": 5175
     }
   ]
 }

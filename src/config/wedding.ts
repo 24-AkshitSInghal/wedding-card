@@ -112,9 +112,19 @@ export interface WeddingConfig {
    *  Lets WhatsApp show the preview picture when the link is shared. */
   siteUrl: string
   showPlaceholders: boolean
+  /** Whose family sends this card: their side is named first ("Sparsh & Vani") and signs
+   *  the closing. Defaults to "bride". */
+  hostSide?: 'bride' | 'groom'
   events: WeddingEvent[]
   /** Live countdown to the wedding, with a scratch card that reveals the date. Set `show: false` to hide. */
-  countdown: { show: boolean; mantra: string; title: string; scratchLabel: string }
+  countdown: {
+    show: boolean
+    mantra: string
+    title: string
+    scratchLabel: string
+    /** The event the countdown runs to (its `id`); defaults to the earliest event. */
+    eventId?: string
+  }
   /** A single line shown on its own slide after the schedule, e.g. "Under the stars". "" hides that slide. */
   eveningLine: string
   /** "Our Story": an introduction and chapters (three to a slide). */

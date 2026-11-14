@@ -68,8 +68,16 @@ export function Scene({ scene, index, cfg, eager }: Props) {
 
         {scene.kind === 'couple' && <CoupleText cfg={cfg} top={preset.textMid} />}
         {scene.kind === 'blessing' && <BlessingText cfg={cfg} top={preset.textMid} />}
-        {scene.kind === 'venue' && scene.event && <VenueText cfg={cfg} ev={scene.event} top={preset.textMid} />}
-        {scene.kind === 'schedule' && <ScheduleText cfg={cfg} top={preset.textMid} henna={extras.has('henna')} />}
+        {scene.kind === 'venue' && <VenueText cfg={cfg} top={preset.textMid} />}
+        {scene.kind === 'schedule' && (
+          <ScheduleText
+            cfg={cfg}
+            events={scene.events ?? cfg.events}
+            multiDay={scene.multiDay}
+            top={preset.textMid}
+            henna={extras.has('henna')}
+          />
+        )}
         {scene.kind === 'evening' && <EveningText cfg={cfg} top={preset.textMid} />}
         {scene.kind === 'countdown' && <CountdownText cfg={cfg} top={preset.textMid} />}
         {scene.kind === 'story' && <StoryText cfg={cfg} chapters={scene.chapters ?? []} intro={scene.intro} top={preset.textMid} />}

@@ -23,6 +23,7 @@ interface CardMeta {
   coupleLead: string
   coupleInvite: string
   siteUrl: string
+  hostSide?: 'bride' | 'groom'
 }
 
 const wedding: CardMeta = cards[CARD as keyof typeof cards]
@@ -41,7 +42,9 @@ function invitationMeta(): Plugin {
   return {
     name: 'invitation-meta',
     transformIndexHtml(html) {
-      const names = [wedding.bride.name, wedding.groom.name].map((n) => n.trim()).filter(Boolean).join(' & ')
+      // The hosting family's side is named first, as on the card.
+      const pair = wedding.hostSide === 'groom' ? [wedding.groom, wedding.bride] : [wedding.bride, wedding.groom]
+      const names = pair.map((p) => p.name.trim()).filter(Boolean).join(' & ')
       const title = names ? `${names} - Wedding Invitation` : 'The Royal Wedding - An Invitation'
       const description = names
         ? `${wedding.coupleLead} ${wedding.coupleInvite}.`

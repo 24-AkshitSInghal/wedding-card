@@ -74,12 +74,45 @@ export function field(value: string | undefined, placeholder: string, cfg: Weddi
 }
 
 /** The couple's names as they should appear (real, placeholder, or null when hidden). */
-export function coupleNames(cfg: WeddingConfig): [string | null, string | null] {
-  return [field(cfg.bride.name, 'Bride Name', cfg), field(cfg.groom.name, 'Groom Name', cfg)]
+/** The couple in the order this card names them: the hosting family's side first. */
+export function partners(cfg: WeddingConfig) {
+  const bride = { person: cfg.bride, prefix: cfg.brideParentsPrefix, role: 'Bride' }
+  const groom = { person: cfg.groom, prefix: cfg.groomParentsPrefix, role: 'Groom' }
+  return cfg.hostSide === 'groom' ? [groom, bride] : [bride, groom]
 }
 
+/** Short names, hosting side first. */
+export function coupleNames(cfg: WeddingConfig): [string | null, string | null] {
+  const [a, b] = partners(cfg)
+  return [field(a.person.name, `${a.role} Name`, cfg), field(b.person.name, `${b.role} Name`, cfg)]
+}
+
+/** Family names, hosting side first. */
 export function familyNames(cfg: WeddingConfig): [string | null, string | null] {
-  return [field(cfg.bride.family, 'Bride Family', cfg), field(cfg.groom.family, 'Groom Family', cfg)]
+  const [a, b] = partners(cfg)
+  return [field(a.person.family, `${a.role} Family`, cfg), field(b.person.family, `${b.role} Family`, cfg)]
+}
+
+const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+const WEEKDAYS_HI = ['रविवार', 'सोमवार', 'मंगलवार', 'बुधवार', 'गुरुवार', 'शुक्रवार', 'शनिवार']
+
+/** The day of the week: "Tuesday" / "मंगलवार". */
+export function weekday(iso: string): string {
+  const p = parseDate(iso)
+  if (!p) return ''
+  const wd = new Date(Date.UTC(p.y, p.m - 1, p.d)).getUTCDay()
+  return (getLang() === 'hi' ? WEEKDAYS_HI : WEEKDAYS)[wd]
+}
+
+/** A run of days as a short span: "8–11 December", or "12 December" for one day. */
+export function daySpan(isos: string[]): string {
+  const ps = [...new Set(isos)].map(parseDate).filter((p) => !!p).sort((a, b) => Date.UTC(a.y, a.m - 1, a.d) - Date.UTC(b.y, b.m - 1, b.d))
+  if (!ps.length) return ''
+  const month = (p: (typeof ps)[number]) => (getLang() === 'hi' ? MONTHS_HI : MONTHS)[p.m - 1]
+  const [a, z] = [ps[0], ps[ps.length - 1]]
+  if (a === z) return `${a.d} ${month(a)}`
+  if (a.m === z.m && a.y === z.y) return `${a.d}–${z.d} ${month(a)}`
+  return `${a.d} ${month(a)} - ${z.d} ${month(z)}`
 }
 
 /** Joins whichever of two names exist with an ampersand. */
@@ -157,7 +190,8 @@ function toUtcStamp(date: Date): string {
 }
 
 function summary(ev: WeddingEvent, cfg: WeddingConfig) {
-  const couple = joinNames(cfg.bride.name.trim() || null, cfg.groom.name.trim() || null)
+  const [a, b] = partners(cfg)
+  const couple = joinNames(a.person.name.trim() || null, b.person.name.trim() || null)
   return couple ? `${ev.title} · ${couple}` : ev.title
 }
 
@@ -237,8 +271,14 @@ export function langFor(text: string): string | undefined {
 
 /** When the celebrations begin: the earliest dated event, at its time if one is set,
  *  otherwise at the start of that day, in the wedding's timezone. */
+/** The events the countdown and "save the date" consider: the chosen one, else all. */
+function keyEvents(cfg: WeddingConfig) {
+  const chosen = cfg.events.filter((e) => e.id === cfg.countdown.eventId)
+  return chosen.length ? chosen : cfg.events
+}
+
 export function weddingStart(cfg: WeddingConfig): Date | null {
-  const dated = cfg.events
+  const dated = keyEvents(cfg)
     .map((e) => ({ d: parseDate(e.date), t: parseTime(e.time) }))
     .filter((x): x is { d: NonNullable<typeof x.d>; t: ReturnType<typeof parseTime> } => !!x.d)
     .sort((a, b) => Date.UTC(a.d.y, a.d.m - 1, a.d.d, a.t?.h ?? 0, a.t?.m ?? 0) - Date.UTC(b.d.y, b.d.m - 1, b.d.d, b.t?.h ?? 0, b.t?.m ?? 0))
@@ -256,7 +296,7 @@ export function timeUntil(target: Date, now = Date.now()) {
 
 /** The first event's date, for a whole-day "save the date" entry. */
 function weddingDay(cfg: WeddingConfig) {
-  const days = cfg.events.map((e) => parseDate(e.date)).filter((d) => !!d).sort((a, b) => Date.UTC(a!.y, a!.m - 1, a!.d) - Date.UTC(b!.y, b!.m - 1, b!.d))
+  const days = keyEvents(cfg).map((e) => parseDate(e.date)).filter((d) => !!d).sort((a, b) => Date.UTC(a!.y, a!.m - 1, a!.d) - Date.UTC(b!.y, b!.m - 1, b!.d))
   return days[0] ?? null
 }
 
@@ -269,9 +309,10 @@ export function saveTheDate(cfg: WeddingConfig) {
   const ymd = (date: Date) => date.toISOString().slice(0, 10).replace(/-/g, '')
   const start = new Date(Date.UTC(d.y, d.m - 1, d.d))
   const end = new Date(start.getTime() + 86_400_000)
-  const couple = joinNames(cfg.bride.name.trim() || null, cfg.groom.name.trim() || null)
+  const [a, b] = partners(cfg)
+  const couple = joinNames(a.person.name.trim() || null, b.person.name.trim() || null)
   const title = couple ? `Wedding of ${couple}` : 'Wedding celebration'
-  const venue = cfg.events.find((e) => e.venue.trim())?.venue ?? ''
+  const venue = keyEvents(cfg).find((e) => e.venue.trim())?.venue ?? ''
   const ios = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
   if (ios) {
     const esc = (s: string) => s.replace(/[\\,;]/g, (c) => `\\${c}`)

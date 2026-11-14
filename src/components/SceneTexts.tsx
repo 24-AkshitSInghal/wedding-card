@@ -4,6 +4,7 @@ import {
   addToCalendar,
   canAddToCalendar,
   coupleNames,
+  daySpan,
   eventUid,
   familyNames,
   field,
@@ -12,8 +13,10 @@ import {
   joinNames,
   langFor,
   opensInNewTab,
+  partners,
   safeUrl,
   telHref,
+  weekday,
 } from '../lib/format'
 import { artUrl } from '../lib/art'
 import { t } from '../lib/i18n'
@@ -88,11 +91,11 @@ function parentsLine(prefix: string, value: string, who: string, cfg: WeddingCon
 }
 
 export function BlessingText({ cfg, top }: { cfg: WeddingConfig; top: number }) {
-  const [shortBride, shortGroom] = coupleNames(cfg)
-  const bride = cfg.bride.fullName.trim() || shortBride
-  const groom = cfg.groom.fullName.trim() || shortGroom
-  const bp = parentsLine(cfg.brideParentsPrefix, cfg.bride.parents, 'Bride', cfg, cfg.bride.city)
-  const gp = parentsLine(cfg.groomParentsPrefix, cfg.groom.parents, 'Groom', cfg, cfg.groom.city)
+  // The hosting family's child is named first, then their new family.
+  const [first, second] = partners(cfg).map((p) => ({
+    name: p.person.fullName.trim() || field(p.person.name, `${p.role} Name`, cfg),
+    parents: parentsLine(p.prefix, p.person.parents, p.role, cfg, p.person.city),
+  }))
   return (
     <TextBlock top={top} width={82}>
       {/* Shri Ganesh heads the formal invitation, as on every traditional card. */}
@@ -108,61 +111,110 @@ export function BlessingText({ cfg, top }: { cfg: WeddingConfig; top: number }) 
         <p className="reveal t-invocation-meaning">{cfg.invocationMeaning}</p>
       )}
       <p className="reveal t-message">{cfg.invitationMessage}</p>
-      {bride && (
+      {first.name && (
         <p className="t-fullname gilt">
-          <SplitText text={bride} />
+          <SplitText text={first.name} />
         </p>
       )}
-      {bp && <p className={`reveal t-parents${bp.placeholder ? ' is-placeholder' : ''}`}>{bp.text}</p>}
-      {bride && groom && (
+      {first.parents && (
+        <p className={`reveal t-parents${first.parents.placeholder ? ' is-placeholder' : ''}`}>{first.parents.text}</p>
+      )}
+      {first.name && second.name && (
         <p className="t-and gilt">
           <span className="ch">&amp;</span>
         </p>
       )}
-      {groom && (
+      {second.name && (
         <p className="t-fullname gilt">
-          <SplitText text={groom} />
+          <SplitText text={second.name} />
         </p>
       )}
-      {gp && <p className={`reveal t-parents${gp.placeholder ? ' is-placeholder' : ''}`}>{gp.text}</p>}
+      {second.parents && (
+        <p className={`reveal t-parents${second.parents.placeholder ? ' is-placeholder' : ''}`}>{second.parents.text}</p>
+      )}
     </TextBlock>
   )
 }
 
-/** The venue on a slide of its own: name, address and a link to the map. */
-export function VenueText({ cfg, ev, top }: { cfg: WeddingConfig; ev: WeddingEvent; top: number }) {
-  const map = safeUrl(ev.mapUrl)
+/** The places the events are held, each with its days, in the order they are first used. */
+function venuesOf(events: WeddingEvent[]) {
+  const list: { venue: string; address: string; mapUrl: string; dates: string[] }[] = []
+  for (const ev of events) {
+    if (!ev.venue.trim()) continue
+    const address = ev.address?.trim() ?? ''
+    const same = list.find((v) => v.venue === ev.venue.trim() && v.address === address)
+    if (same) same.dates.push(ev.date)
+    else list.push({ venue: ev.venue.trim(), address, mapUrl: ev.mapUrl, dates: [ev.date] })
+  }
+  return list
+}
+
+function VenueLink({ url }: { url: string }) {
+  const map = safeUrl(url)
+  if (!map) return null
   return (
-    <TextBlock top={top} width={76}>
+    <p className="reveal t-actions">
+      <a className="t-link" href={map} target="_blank" rel="noopener noreferrer" tabIndex={-1}>
+        <PinIcon />
+        {t('viewVenue')}
+      </a>
+    </p>
+  )
+}
+
+/** The venue on a slide of its own: name, address and a link to the map. With more than
+ *  one venue, each is listed under the days it is used ("8–11 December"). */
+export function VenueText({ cfg, top }: { cfg: WeddingConfig; top: number }) {
+  const venues = venuesOf(cfg.events)
+  const several = venues.length > 1
+  return (
+    <TextBlock top={top} width={78}>
       <p className="t-event-title gilt">
-        <SplitText text={t('venue')} />
+        <SplitText text={several ? t('venues') : t('venue')} />
       </p>
       <Rule />
-      <Line value={ev.venue} placeholder="Venue" cfg={cfg} className="t-venue t-venue--big" />
-      {ev.address?.trim() && <p className="reveal t-address">{ev.address}</p>}
-      {map && (
-        <p className="reveal t-actions">
-          <a className="t-link" href={map} target="_blank" rel="noopener noreferrer" tabIndex={-1}>
-            <PinIcon />
-            {t('viewVenue')}
-          </a>
-        </p>
-      )}
+      {venues.map((v, i) => (
+        <div key={`${v.venue}-${i}`} className={`venue-item${several ? ' is-several' : ''}`}>
+          {i > 0 && <Rule />}
+          {several && <p className="reveal t-venue-days">{daySpan(v.dates)}</p>}
+          <p className="reveal t-venue t-venue--big">{v.venue}</p>
+          {v.address && <p className="reveal t-address">{v.address}</p>}
+          <VenueLink url={v.mapUrl} />
+        </div>
+      ))}
+      {!venues.length && <Line value="" placeholder="Venue" cfg={cfg} className="t-venue t-venue--big" />}
       <Rule />
     </TextBlock>
   )
 }
 
-/** Every event on one slide: the date once, then each title with its time. */
-export function ScheduleText({ cfg, top, henna }: { cfg: WeddingConfig; top: number; henna?: boolean }) {
-  const first = cfg.events[0]
+/** A day's events (or every event, for a one-day wedding): the date once, then each
+ *  title with its time. */
+export function ScheduleText({
+  cfg,
+  events,
+  multiDay,
+  top,
+  henna,
+}: {
+  cfg: WeddingConfig
+  events: WeddingEvent[]
+  multiDay?: boolean
+  top: number
+  henna?: boolean
+}) {
+  const first = events[0]
   const showCalendar = first && canAddToCalendar(first, cfg)
+  const date = first?.date.trim() ? formatDate(first.date) : ''
+  // Over several days, each day's slide names its weekday above the date.
+  const day = multiDay && first ? weekday(first.date) : ''
   return (
-    <TextBlock top={top} width={76}>
+    <TextBlock top={top} width={78}>
       {henna && <Henna />}
-      {first && <Line value={first.date.trim() ? formatDate(first.date) : ''} placeholder="Date" cfg={cfg} className="t-event-date" />}
-      {cfg.events.map((ev, i) => (
-        <div key={eventUid(ev, i)} className="schedule-item">
+      {day && <p className="reveal t-event-weekday">{day}</p>}
+      {first && <Line value={date} placeholder="Date" cfg={cfg} className="t-event-date" />}
+      {events.map((ev, i) => (
+        <div key={eventUid(ev, cfg.events.indexOf(ev))} className="schedule-item">
           {i > 0 && <Rule />}
           <p className="t-event-title gilt">
             <SplitText text={ev.title} />
@@ -173,7 +225,12 @@ export function ScheduleText({ cfg, top, henna }: { cfg: WeddingConfig; top: num
       ))}
       {showCalendar && (
         <p className="reveal t-actions">
-          <button type="button" className="t-link" tabIndex={-1} onClick={() => addToCalendar(first, cfg, eventUid(first, 0))}>
+          <button
+            type="button"
+            className="t-link"
+            tabIndex={-1}
+            onClick={() => addToCalendar(first, cfg, eventUid(first, cfg.events.indexOf(first)))}
+          >
             <CalendarIcon />
             {t('addToCalendar')}
           </button>
@@ -252,17 +309,15 @@ export function ScreenReaderInvitation({
   beforeEvents?: ReactNode
   afterEvents?: ReactNode
 }) {
-  const [bride, groom] = coupleNames(cfg)
+  const [first, second] = coupleNames(cfg)
   const [bf, gf] = familyNames(cfg)
   const rsvp = safeUrl(cfg.rsvp.url)
   // Placeholders are for the person editing the invitation, not for screen-reader guests.
   const real = (v: string | null) => (v && !v.startsWith('[') ? v : null)
-  const bp = parentsLine(cfg.brideParentsPrefix, cfg.bride.parents, 'Bride', cfg, cfg.bride.city)
-  const gp = parentsLine(cfg.groomParentsPrefix, cfg.groom.parents, 'Groom', cfg, cfg.groom.city)
   const families = real(bf) || real(gf)
   return (
     <main className="sr-invitation">
-      <h1>{joinNames(real(bride), real(groom)) || 'Wedding invitation'}</h1>
+      <h1>{joinNames(real(first), real(second)) || 'Wedding invitation'}</h1>
       <p>{cfg.coupleLead}</p>
       <p>{cfg.coupleInvite}</p>
       {cfg.hashtag.trim() && <p>{cfg.hashtag}</p>}
@@ -271,16 +326,15 @@ export function ScreenReaderInvitation({
         {cfg.invocation.trim() && <p lang={langFor(cfg.invocation)}>{cfg.invocation}</p>}
         {cfg.invocation.trim() && cfg.invocationMeaning.trim() && <p>{cfg.invocationMeaning}</p>}
         <p>{cfg.invitationMessage}</p>
-        {(cfg.bride.fullName.trim() || real(bride)) && (
-          <p>
-            {cfg.bride.fullName.trim() || real(bride)} {bp && !bp.placeholder ? bp.text : ''}
-          </p>
-        )}
-        {(cfg.groom.fullName.trim() || real(groom)) && (
-          <p>
-            {cfg.groom.fullName.trim() || real(groom)} {gp && !gp.placeholder ? gp.text : ''}
-          </p>
-        )}
+        {partners(cfg).map((p, i) => {
+          const name = p.person.fullName.trim() || real(i === 0 ? first : second)
+          const line = parentsLine(p.prefix, p.person.parents, p.role, cfg, p.person.city)
+          return name ? (
+            <p key={p.role}>
+              {name} {line && !line.placeholder ? line.text : ''}
+            </p>
+          ) : null
+        })}
       </section>
 
       {beforeEvents}

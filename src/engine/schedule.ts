@@ -33,8 +33,10 @@ export interface SceneModel {
   id: string
   kind: SceneKind
   preset: ScenePreset
-  /** For the venue slide: the event whose venue is shown. */
-  event?: WeddingEvent
+  /** For a schedule slide: the events it lists (one day's, or all when there is one day). */
+  events?: WeddingEvent[]
+  /** For a schedule slide: true when the wedding spans several days (each gets a slide). */
+  multiDay?: boolean
   /** For story scenes: the chapters shown, and whether the introduction leads. */
   chapters?: StoryChapter[]
   intro?: boolean
@@ -53,7 +55,7 @@ export interface SceneModel {
 const TAIL = 0.35
 
 export function buildScenes(cfg: WeddingConfig): { scenes: SceneModel[]; total: number } {
-  type Raw = Pick<SceneModel, 'id' | 'kind' | 'preset' | 'event' | 'chapters' | 'intro' | 'part'> & { hold: number }
+  type Raw = Pick<SceneModel, 'id' | 'kind' | 'preset' | 'events' | 'multiDay' | 'chapters' | 'intro' | 'part'> & { hold: number }
   // The story opens with its title and introduction on their own slide, then the chapters
   // follow three to a slide so the words can stay large.
   const { chapters } = cfg.story
@@ -73,6 +75,13 @@ export function buildScenes(cfg: WeddingConfig): { scenes: SceneModel[]; total: 
       ]
     : []
   const [first, second] = cfg.events
+  // Events grouped by day, in the order the days first appear.
+  const days: WeddingEvent[][] = []
+  for (const ev of cfg.events) {
+    const day = days.find((d) => d[0].date === ev.date)
+    if (day) day.push(ev)
+    else days.push([ev])
+  }
   const little = cfg.littleHearts
   const { welcome } = cfg
 
@@ -81,11 +90,19 @@ export function buildScenes(cfg: WeddingConfig): { scenes: SceneModel[]; total: 
     { id: 'couple', kind: 'couple', preset: COUPLE, hold: HOLD.couple },
     ...(cfg.countdown.show ? [{ id: 'countdown', kind: 'countdown' as const, preset: COUNTDOWN, hold: HOLD.countdown }] : []),
     ...story,
-    // The venue has a slide of its own; the schedule slide then lists only the times.
-    ...(first?.venue.trim() ? [{ id: 'venue', kind: 'venue' as const, preset: STORY_TWO, hold: HOLD.story, event: first }] : []),
+    // The venue (or venues) has a slide of its own; the schedule slides list only the times.
+    ...(first?.venue.trim() ? [{ id: 'venue', kind: 'venue' as const, preset: STORY_TWO, hold: HOLD.story }] : []),
     { id: 'blessing', kind: 'blessing', preset: BLESSING, hold: HOLD.blessing },
-    // All the events share one slide, painted as the first event's scene.
-    ...(first ? [{ id: 'schedule', kind: 'schedule' as const, preset: presetFor(first.scene, 0), hold: HOLD.event }] : []),
+    // One slide for the whole schedule when it is a single day; otherwise one slide per day,
+    // each painted as the scene of that day's first event.
+    ...days.map((events, i) => ({
+      id: days.length > 1 ? `day-${i + 1}` : 'schedule',
+      kind: 'schedule' as const,
+      preset: presetFor(events[0].scene, i),
+      hold: HOLD.event,
+      events,
+      multiDay: days.length > 1,
+    })),
     // A single line rests on the second event's scene, e.g. "Under the stars".
     ...(cfg.eveningLine.trim()
       ? [{ id: 'evening', kind: 'evening' as const, preset: presetFor(second?.scene ?? 'hasta-melap', 1), hold: HOLD.event }]
