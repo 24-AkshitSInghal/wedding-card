@@ -197,6 +197,88 @@
   100% { scale: 1 1; opacity: 0; translate: 0 10px; }
 }
 
+/* "Swipe up" at the foot of every page (cards with `pageHint`): the same lacquered pill as
+   the gateway's hint, with two chevrons that climb in turn. It fades in once a page has
+   settled and steps aside while the guest moves on. */
+.page-hint {
+  position: fixed;
+  left: 50%;
+  bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+  z-index: 590;
+  display: flex;
+  align-items: center;
+  gap: 0.75em;
+  padding: 0.8em 1.45em 0.72em 1.15em;
+  border: 1px solid rgb(231 194 124 / 0.6);
+  border-radius: 999px;
+  background: rgb(40 8 10 / 0.62);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  box-shadow: 0 4px 18px rgb(0 0 0 / 0.35);
+  color: var(--gold-hi);
+  font-family: var(--caps);
+  font-size: clamp(10px, calc(var(--u) * 2.7), 12px);
+  line-height: 1;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  translate: -50% 8px;
+  transition: opacity 0.25s ease, translate 0.25s ease;
+}
+.is-ready .page-hint.is-shown {
+  opacity: 1;
+  translate: -50% 0;
+  transition: opacity 0.7s 0.45s ease, translate 0.7s 0.45s ease;
+}
+.page-hint-arrow {
+  flex: none;
+  width: 1.15em;
+  height: 1.5em;
+  overflow: visible;
+  fill: none;
+  stroke: var(--gold);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.page-hint-arrow path {
+  animation: page-hint-climb 1.8s ease-in-out infinite;
+}
+.page-hint-arrow path:first-child {
+  animation-delay: 0.22s;
+}
+@keyframes page-hint-climb {
+  0%, 100% { opacity: 0.3; translate: 0 1.5px; }
+  45% { opacity: 1; translate: 0 -1.5px; }
+}
+/* With a mouse or trackpad the page moves on with a scroll down, so say that instead. */
+.page-hint-mouse {
+  display: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  .page-hint-touch {
+    display: none;
+  }
+  .page-hint-mouse {
+    display: inline;
+  }
+  .page-hint-arrow {
+    rotate: 180deg;
+  }
+}
+.lang-hi .page-hint {
+  font-family: 'Tiro Devanagari Hindi', serif;
+  font-size: clamp(12px, calc(var(--u) * 3.4), 15px);
+  letter-spacing: 0.04em;
+  text-transform: none;
+}
+.is-reduced .page-hint-arrow path {
+  animation: none;
+  opacity: 1;
+}
+
 /* Doves */
 .doves {
   position: absolute;

@@ -48,6 +48,10 @@
 .scene-text-inner {
   zoom: var(--tz, 1);
 }
+/* A block a card asked to set smaller (TextBlock's `scale`); zooms multiply when nested. */
+.scene-text-scale {
+  flex: none;
+}
 @media (min-aspect-ratio: 10/19) {
   .scene-text-inner {
     --tz: 0.86;

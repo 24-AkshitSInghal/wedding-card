@@ -135,6 +135,10 @@ export default function App({ lang, onToggleLang }: Props) {
 
       const visible: boolean[] = rts.map(() => false)
       let shown = -1
+      // The "Swipe up" hint (when the card asks for it) shows while a page rests between the
+      // opening and the closing, and steps aside while the guest moves between pages.
+      const hint = root.querySelector<HTMLElement>('.page-hint')
+      let hintOn = false
       const sync = () => {
         const time = tl.time()
         let latest = 0
@@ -149,6 +153,14 @@ export default function App({ lang, onToggleLang }: Props) {
         })
         // The language switch belongs to the threshold of the palace.
         root.classList.toggle('at-start', time < scenes[0].exitAt + 0.15)
+        if (hint) {
+          const s = scenes[latest]
+          const resting = latest > 0 && s.kind !== 'closing' && time >= s.restAt && time <= s.exitAt
+          if (resting !== hintOn) {
+            hintOn = resting
+            hint.classList.toggle('is-shown', resting)
+          }
+        }
         if (latest !== shown) {
           // Scrolling forward into a scene greets it with a shower of its flowers.
           const arriving = shown >= 0 && latest > shown
@@ -311,6 +323,17 @@ export default function App({ lang, onToggleLang }: Props) {
       <button type="button" className="lang-toggle" onClick={onToggleLang} aria-label={t('switchLabel')} lang={lang === 'hi' ? 'en' : 'hi'}>
         {t('switchTo')}
       </button>
+
+      {cfg.pageHint && (
+        <div className="page-hint" aria-hidden="true">
+          <svg className="page-hint-arrow" viewBox="0 0 14 18" aria-hidden="true">
+            <path d="M2 8.5 7 3.5l5 5" />
+            <path d="M2 14.5 7 9.5l5 5" />
+          </svg>
+          <span className="page-hint-touch">{t('swipeUp')}</span>
+          <span className="page-hint-mouse">{t('scrollDown')}</span>
+        </div>
+      )}
 
       <div ref={bloomRef} className="bloom" />
       {!reduced && <Particles ref={particles} lite={lite} />}

@@ -115,6 +115,16 @@ export interface WeddingConfig {
   /** Whose family sends this card: their side is named first ("Sparsh & Vani") and signs
    *  the closing. Defaults to "bride". */
   hostSide?: 'bride' | 'groom'
+  /** Shows a small "Swipe up" hint at the foot of every page between the opening and the
+   *  closing, so guests know there is more to see. Defaults to off. */
+  pageHint?: boolean
+  /** Moves the words on the venue page down (positive) or up (negative), as a fraction of
+   *  the page's height, e.g. 0.05. Defaults to 0. */
+  venueTextShift?: number
+  /** Adjusts one day's schedule page, keyed by that day's date. `shift` moves its words up
+   *  (negative) or down as a fraction of the page's height; `scale` sets them a little
+   *  smaller (e.g. 0.85) when a busy day needs the room. Days not listed are unchanged. */
+  dayText?: Record<string, { shift?: number; scale?: number }>
   events: WeddingEvent[]
   /** Live countdown to the wedding, with a scratch card that reveals the date. Set `show: false` to hide. */
   countdown: {

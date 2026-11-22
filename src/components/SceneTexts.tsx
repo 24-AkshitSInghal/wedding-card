@@ -33,14 +33,23 @@ interface BlockProps {
   /** Vertical centre of the block as a fraction of the frame's height. */
   top: number
   width?: number
+  /** Sets the words a little smaller (or larger) than usual, e.g. 0.85. */
+  scale?: number
   children: ReactNode
 }
 
 /** Text block centred on a line inside the frame. `.reveal` children are faded in by the timeline. */
-export function TextBlock({ top, width, children }: BlockProps) {
+export function TextBlock({ top, width, scale, children }: BlockProps) {
+  const inner = <div className="scene-text-inner">{children}</div>
   return (
     <div className="scene-text" data-d="0" data-role="text" style={{ '--mid': top, '--tw': width ?? 74 } as CSSProperties}>
-      <div className="scene-text-inner">{children}</div>
+      {scale && scale !== 1 ? (
+        <div className="scene-text-scale" style={{ zoom: scale }}>
+          {inner}
+        </div>
+      ) : (
+        inner
+      )}
     </div>
   )
 }
@@ -195,12 +204,14 @@ export function ScheduleText({
   events,
   multiDay,
   top,
+  scale,
   henna,
 }: {
   cfg: WeddingConfig
   events: WeddingEvent[]
   multiDay?: boolean
   top: number
+  scale?: number
   henna?: boolean
 }) {
   const first = events[0]
@@ -209,7 +220,7 @@ export function ScheduleText({
   // Over several days, each day's slide names its weekday above the date.
   const day = multiDay && first ? weekday(first.date) : ''
   return (
-    <TextBlock top={top} width={78}>
+    <TextBlock top={top} width={78} scale={scale}>
       {henna && <Henna />}
       {day && <p className="reveal t-event-weekday">{day}</p>}
       {first && <Line value={date} placeholder="Date" cfg={cfg} className="t-event-date" />}

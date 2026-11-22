@@ -10,6 +10,12 @@ const MOOLCHAND_MAP = 'https://www.google.com/maps/search/?api=1&query=Moolchand
 export const wedding: WeddingConfig = {
   // The Gupta family sends this card: Sparsh is named first and the family signs it.
   hostSide: 'groom',
+  // A "Swipe up" hint at the foot of every page, and the venue page's words set a little lower.
+  pageHint: true,
+  venueTextShift: 0.05,
+  // 12 December has three events: its words sit higher and a little smaller so they clear
+  // the mandap at the foot of that page.
+  dayText: { '2026-12-12': { shift: -0.125, scale: 0.82 } },
   bride: {
     name: 'Vani',
     fullName: '',
@@ -32,7 +38,7 @@ export const wedding: WeddingConfig = {
   coupleLead: 'You are invited to celebrate love',
   coupleInvite: 'Two hearts, one beautiful beginning',
   invitationMessage:
-    'With the divine blessings of Smt. Sarlarani Gupta and Shri Harisharan Gupta Ji. With immense joy and the blessings of our elders, we invite you to grace the wedding celebration of our beloved son',
+    'Mrs. Sarla Rani & Mr. Harisharan Gupta (Bhagat) cordially invite you, with immense joy and happiness, to grace the auspicious wedding ceremony of their beloved grandson.',
   brideParentsPrefix: 'Daughter of',
   groomParentsPrefix: 'Son of',
   closing: {
@@ -50,7 +56,8 @@ export const wedding: WeddingConfig = {
   timezone: 'Asia/Kolkata',
   siteUrl: '',
   showPlaceholders: true,
-  // 8 to 11 December at home, 12 December at Moolchand Resorts. Each day gets its own slide.
+  // 8 to 11 December at home, 12 December (Chadat, Shaadi, Dinner) at Moolchand Resorts.
+  // Each day gets its own slide.
   events: [
     {
       id: 'kirtan',
@@ -133,13 +140,23 @@ export const wedding: WeddingConfig = {
       mapUrl: LAXMAN_VIHAR_MAP,
     },
     {
+      id: 'chadat',
+      scene: 'varmala',
+      title: 'Chadat',
+      date: '2026-12-12',
+      time: '17:00',
+      venue: 'Moolchand Resorts',
+      address: '8 th km stone, Meerut Road, Bahadarpur, Muzaffarnagar, U.P.',
+      mapUrl: MOOLCHAND_MAP,
+    },
+    {
       id: 'shaadi',
       scene: 'varmala',
       title: 'Shaadi Samaroh',
       date: '2026-12-12',
       time: '20:00',
       venue: 'Moolchand Resorts',
-      address: '8th km stone, Meerut Road, Bahadarpur, Muzaffarnagar, U.P.',
+      address: '8 th km stone, Meerut Road, Bahadarpur, Muzaffarnagar, U.P.',
       mapUrl: MOOLCHAND_MAP,
     },
     {
@@ -149,7 +166,7 @@ export const wedding: WeddingConfig = {
       date: '2026-12-12',
       time: '20:30',
       venue: 'Moolchand Resorts',
-      address: '8th km stone, Meerut Road, Bahadarpur, Muzaffarnagar, U.P.',
+      address: '8 th km stone, Meerut Road, Bahadarpur, Muzaffarnagar, U.P.',
       mapUrl: MOOLCHAND_MAP,
     },
   ],
@@ -176,8 +193,8 @@ export const wedding: WeddingConfig = {
   littleHearts: { title: '', names: '', message: [] },
   welcome: {
     heartyTitle: 'Hearty Welcome By',
-    hearty: ['Anisha - Deepak Gupta', 'Rashmi - Gopal Sharan Gupta', 'Suman - Manoj Agarwal'],
+    hearty: ['Suman Agarwal & Manoj Agarwal', 'Rashmi Gupta & Gopal Gupta', 'Anisha Gupta & Deepak Gupta'],
     specialTitle: 'Special Invitation From',
-    special: ['Aman Gupta', 'Avni Gupta', 'Apoorva Mittal', 'Bhumika Mittal', 'Annaya Mittal', 'Akshat Mittal'],
+    special: ['Apoorva Mittal', 'Bhumika Mittal', 'Aman Gupta', 'Ananya Mittal', 'Avni Gupta', 'Akshat Mittal'],
   },
 }

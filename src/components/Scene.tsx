@@ -21,6 +21,8 @@ export function Scene({ scene, index, cfg, eager }: Props) {
   const { preset } = scene
   const extras = new Set(preset.extras ?? [])
   const pal = preset.palette
+  // A card can lift or tighten the words of one busy day's schedule page.
+  const dayText = scene.kind === 'schedule' ? cfg.dayText?.[scene.events?.[0]?.date ?? ''] : undefined
   const style = {
     '--c-center': pal.center,
     '--c-mid': pal.mid,
@@ -68,13 +70,14 @@ export function Scene({ scene, index, cfg, eager }: Props) {
 
         {scene.kind === 'couple' && <CoupleText cfg={cfg} top={preset.textMid} />}
         {scene.kind === 'blessing' && <BlessingText cfg={cfg} top={preset.textMid} />}
-        {scene.kind === 'venue' && <VenueText cfg={cfg} top={preset.textMid} />}
+        {scene.kind === 'venue' && <VenueText cfg={cfg} top={preset.textMid + (cfg.venueTextShift ?? 0)} />}
         {scene.kind === 'schedule' && (
           <ScheduleText
             cfg={cfg}
             events={scene.events ?? cfg.events}
             multiDay={scene.multiDay}
-            top={preset.textMid}
+            top={preset.textMid + (dayText?.shift ?? 0)}
+            scale={dayText?.scale}
             henna={extras.has('henna')}
           />
         )}
