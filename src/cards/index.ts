@@ -5,5 +5,6 @@
  */
 import { wedding as primary } from './primary/en.ts'
 import { wedding as second } from './second/en.ts'
+import { wedding as third } from './third/en.ts'
 
-export const cards = { primary, second }
+export const cards = { primary, second, third }

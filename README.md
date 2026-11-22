@@ -56,12 +56,18 @@ GitHub Pages) and share the link on WhatsApp. To build another card, set `CARD`:
 CARD=second npm run build
 ```
 
-## Two cards, two sites
+## Several cards, several sites
 
 The same invitation can go out with different words, for example one card from each
-family. Each card is a folder in `src/cards/` (`primary` and `second` to start with;
-`second` begins as a copy of `primary`, so edit its `en.ts` and `hi.ts`). To add another,
-copy a folder and add one line for it in `src/cards/index.ts`.
+family. Each card is a folder in `src/cards/`:
+
+- `primary`: the Bansal family's card (Vani's side).
+- `second`: the Gupta family's card (Sparsh's side), with every function from 8 to 12 December.
+- `third`: the Gupta family's card for the wedding day only, 12 December (Chadat, Shaadi
+  Samaroh and Dinner). Its words are otherwise the same as `second`, so a change to the
+  shared words belongs in both folders.
+
+To add another, copy a folder and add one line for it in `src/cards/index.ts`.
 
 ## Deploy on Vercel
 
@@ -71,8 +77,8 @@ same GitHub repository:
 1. On vercel.com choose **Add New… → Project** and import the repository.
 2. Leave the framework (Vite), build command and output folder as they are.
 3. Under **Environment Variables** add `CARD` with the card's folder name
-   (`primary` for the first site, `second` for the second).
-4. Click **Deploy**. Every push to `main` then redeploys both sites.
+   (`primary` for the first site, `second` for the second, `third` for the third).
+4. Click **Deploy**. Every push to `main` then redeploys every site.
 
 Give each project its own name (it becomes the address, e.g. `vani-sparsh.vercel.app`),
 or add your own domain under the project's **Settings → Domains**.
