@@ -2,6 +2,8 @@ import type { WeddingConfig } from '../../config/wedding.ts'
 
 /** This card's words, in English. Everything shown on the card comes from here. */
 export const wedding: WeddingConfig = {
+  // A "Swipe up" hint at the foot of every page between the opening and the closing.
+  pageHint: true,
   bride: {
     name: 'Vani',
     fullName: '',
@@ -89,7 +91,7 @@ export const wedding: WeddingConfig = {
   },
   littleHearts: {
     title: 'Our Little Hearts Welcome You',
-    names: 'Gauvangi & Shridha',
+    names: 'Gauvangi & Aniksha',
     message: [
       'Tiny hands, cheerful smiles, and lots of love to make you feel special!',
       'Dear guests, your presence means the world to us. With happy hearts and warm smiles, we welcome you to the wedding celebration of Vani and Sparsh.',
