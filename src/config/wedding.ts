@@ -135,8 +135,13 @@ export interface WeddingConfig {
     /** The event the countdown runs to (its `id`); defaults to the earliest event. */
     eventId?: string
   }
-  /** A single line shown on its own slide after the schedule, e.g. "Under the stars". "" hides that slide. */
+  /** A single line shown on its own slide after the schedule, e.g. "Under the stars". "" hides
+   *  that slide, unless `eveningVerse` fills it. */
   eveningLine: string
+  /** Optional lines for the evening slide (under `eveningLine`, or on their own when it is ""):
+   *  a heading, a sentence and a small footer, e.g. "Moonlight & Matrimony 🌙" /
+   *  "Under the moonlight…" / "Vani & Sparsh | 12.12.2026". */
+  eveningVerse?: { title: string; text: string; footer: string }
   /** "Our Story": an introduction and chapters (three to a slide). */
   story: { title: string; intro: string; chapters: StoryChapter[] }
   /** A welcome from the little ones of the family. Leave `names` empty to hide. */

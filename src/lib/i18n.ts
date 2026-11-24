@@ -19,6 +19,7 @@ export interface WeddingOverrides {
   events?: Record<string, Partial<Pick<WeddingEvent, 'title' | 'note' | 'venue' | 'address' | 'timeSuffix'>>>
   countdown?: Partial<Pick<WeddingConfig['countdown'], 'title' | 'scratchLabel' | 'mantra'>>
   eveningLine?: string
+  eveningVerse?: Partial<NonNullable<WeddingConfig['eveningVerse']>>
   story?: { title?: string; intro?: string; chapters?: StoryChapter[] }
   littleHearts?: Partial<WeddingConfig['littleHearts']>
   welcome?: Partial<WeddingConfig['welcome']>
@@ -128,6 +129,7 @@ export function localize(cfg: WeddingConfig, over: WeddingOverrides | null): Wed
     events: cfg.events.map((e) => ({ ...e, ...over.events?.[e.id] })),
     countdown: { ...cfg.countdown, ...over.countdown },
     eveningLine: pick(over.eveningLine, cfg.eveningLine),
+    eveningVerse: cfg.eveningVerse && { ...cfg.eveningVerse, ...over.eveningVerse },
     story: {
       title: pick(over.story?.title, cfg.story.title),
       intro: pick(over.story?.intro, cfg.story.intro),

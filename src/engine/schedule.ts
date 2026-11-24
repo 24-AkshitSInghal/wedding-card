@@ -104,7 +104,7 @@ export function buildScenes(cfg: WeddingConfig): { scenes: SceneModel[]; total: 
       multiDay: days.length > 1,
     })),
     // A single line rests on the second event's scene, e.g. "Under the stars".
-    ...(cfg.eveningLine.trim()
+    ...(cfg.eveningLine.trim() || cfg.eveningVerse?.title.trim() || cfg.eveningVerse?.text.trim()
       ? [{ id: 'evening', kind: 'evening' as const, preset: presetFor(second?.scene ?? 'hasta-melap', 1), hold: HOLD.event }]
       : []),
     ...(little.names.trim() || little.message.length

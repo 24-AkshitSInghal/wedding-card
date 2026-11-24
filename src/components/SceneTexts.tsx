@@ -252,15 +252,25 @@ export function ScheduleText({
   )
 }
 
-/** A single line resting on its own scene. */
+/** A single line resting on its own scene, with the card's optional verse beneath it. */
 export function EveningText({ cfg, top }: { cfg: WeddingConfig; top: number }) {
+  const verse = cfg.eveningVerse
+  const line = cfg.eveningLine.trim()
   return (
     <TextBlock top={top} width={80}>
       <Rule />
-      <p className="t-evening gilt">
-        <SplitText text={cfg.eveningLine} />
-      </p>
-      <Rule />
+      {line && (
+        <>
+          <p className="t-evening gilt">
+            <SplitText text={line} />
+          </p>
+          <Rule />
+        </>
+      )}
+      {verse?.title.trim() && <p className={`reveal t-verse-title${line ? '' : ' is-lead'}`}>{verse.title}</p>}
+      {verse?.text.trim() && <p className="reveal t-verse-text">{verse.text}</p>}
+      {verse?.footer.trim() && <p className="reveal t-verse-footer">{verse.footer}</p>}
+      {!line && verse && <Rule />}
     </TextBlock>
   )
 }
@@ -377,6 +387,15 @@ export function ScreenReaderInvitation({
           </section>
         )
       })}
+
+      {(cfg.eveningLine.trim() || cfg.eveningVerse) && (
+        <section>
+          {cfg.eveningLine.trim() && <h2>{cfg.eveningLine}</h2>}
+          {cfg.eveningVerse?.title.trim() && <p>{cfg.eveningVerse.title}</p>}
+          {cfg.eveningVerse?.text.trim() && <p>{cfg.eveningVerse.text}</p>}
+          {cfg.eveningVerse?.footer.trim() && <p>{cfg.eveningVerse.footer}</p>}
+        </section>
+      )}
 
       {afterEvents}
 

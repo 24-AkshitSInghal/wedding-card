@@ -71,7 +71,12 @@ export const wedding: WeddingConfig = {
       mapUrl: 'https://www.google.com/maps/search/?api=1&query=Moolchand+Resorts+Meerut+Road+Bahadarpur+Muzaffarnagar',
     },
   ],
-  eveningLine: 'Under the stars',
+  eveningLine: '',
+  eveningVerse: {
+    title: 'Moonlight & Matrimony 🌙',
+    text: 'Under the moonlight, two hearts begin their forever. ✨',
+    footer: 'Vani & Sparsh | 12.12.2026',
+  },
   countdown: {
     show: true,
     // "Ganesh Ji ka mantra" from the card; change it to the exact words you want.
@@ -91,7 +96,7 @@ export const wedding: WeddingConfig = {
   },
   littleHearts: {
     title: 'Our Little Hearts Welcome You',
-    names: 'Gauvangi & Aniksha',
+    names: 'Gaurangi & Aniksha',
     message: [
       'Tiny hands, cheerful smiles, and lots of love to make you feel special!',
       'Dear guests, your presence means the world to us. With happy hearts and warm smiles, we welcome you to the wedding celebration of Vani and Sparsh.',
