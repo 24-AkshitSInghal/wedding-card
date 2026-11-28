@@ -26,7 +26,7 @@ export const wedding: WeddingConfig = {
   coupleLead: 'You are invited to celebrate love',
   coupleInvite: 'Two hearts, one beautiful beginning',
   invitationMessage:
-    'With the divine blessings of Smt. Rajdulari Bansal and Late Shri Ishwar Dayal Bansal Ji. With immense joy and the blessings of our elders, we invite you to grace the wedding celebration of our beloved daughter',
+    'With the divine blessings of Smt. Rajdulari Bansal and Late Shri Ishwar Dayal Bansal Ji. With immense joy and the blessings of our elders, we invite you to grace the wedding celebration of our beloved granddaughter',
   brideParentsPrefix: 'Daughter of',
   groomParentsPrefix: 'Son of',
   closing: {
@@ -105,8 +105,15 @@ export const wedding: WeddingConfig = {
   },
   welcome: {
     heartyTitle: 'Hearty Welcome By',
-    hearty: ['Renuka - Anil Kumar Bansal', 'Prerna - Sushil Bansal', 'Mansi - Praveen Bansal', 'Sakshi - Manik Bansal'],
+    hearty: [
+      'Renuka - Anil Kumar Bansal',
+      'Prerna - Sushil Kumar Bansal',
+      'Mansi - Praveen Kumar Bansal',
+      'Vandana - Alok Ji',
+      'Sakshi - Manik Bansal',
+      'Akshita - Sparsh Ji',
+    ],
     specialTitle: 'Special Invitation From',
-    special: ['Vandana - Alok Ji', 'Akshita - Sparsh Ji', 'Avish', 'Pranav', 'Paridhi', 'Aryan', 'Lakshay', 'Aarushi'],
+    special: ['Avish', 'Pranav', 'Paridhi', 'Aryan', 'Lakshay', 'Aarushi'],
   },
 }
